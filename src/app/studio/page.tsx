@@ -1,6 +1,12 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { Space_Mono } from "next/font/google";
+
+const spaceMono = Space_Mono({
+  subsets: ["latin"],
+  weight: ["400", "700"],
+});
 
 export default function Studio() {
   const [passage, setPassage] = useState("");
@@ -19,8 +25,10 @@ export default function Studio() {
   }, []);
 
   return (
-    <main>
-        <p>{passage}</p>
+    <main className="studio">
+      <section className="studio-content">
+        <p className={spaceMono.className}>{passage}</p>
+      </section>
     </main>
   );
 }

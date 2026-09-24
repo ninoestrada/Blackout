@@ -15,16 +15,6 @@ const victorMono = Victor_Mono({
 export default function Home() {
   return (
     <main className="landing">
-      <header className="landing-header">
-        <div className={`site-title ${spaceMono.className}`}>
-          <span className="marked-word">black</span>out
-        </div>
-
-        <button className={`landing-button ${spaceMono.className}`}>
-          Sign in
-        </button>
-      </header>
-
       <section className="landing-content">
         <h1 className={spaceMono.className}>
           Start blackout
