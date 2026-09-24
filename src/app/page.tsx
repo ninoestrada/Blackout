@@ -1,20 +1,59 @@
 import Link from "next/link";
+import { Space_Mono, Victor_Mono } from "next/font/google";
+
+const spaceMono = Space_Mono({
+  subsets: ["latin"],
+  weight: ["400", "700"],
+});
+
+const victorMono = Victor_Mono({
+  subsets: ["latin"],
+  style: ["italic"],
+  weight: ["400"],
+});
 
 export default function Home() {
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex min-h-screen w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-          Blackout Studio.
+    <main className="landing">
+      <header className="landing-header">
+        <div className={`site-title ${spaceMono.className}`}>
+          <span className="marked-word">black</span>out
+        </div>
+
+        <button className={`landing-button ${spaceMono.className}`}>
+          Sign in
+        </button>
+      </header>
+
+      <section className="landing-content">
+        <h1 className={spaceMono.className}>
+          Start blackout
+          <br />
+          poetry. <u className="here-text">Here.</u>
         </h1>
 
-        <Link
-          href="/studio"
-          className="px-6 py-3 rounded-md bg-black text-white hover:bg-zinc-800 transition"
-        >
-          Start Marking
-        </Link>
-      </main>
-    </div>
+        <p>
+          This workspace lets you take any text,
+          <br />
+          remove what you don&apos;t want,
+          <br />
+          and reveal what was there all along.
+        </p>
+
+        <div className="landing-actions">
+          <Link
+            href="/studio"
+            className={`landing-button ${spaceMono.className}`}
+          >
+            Enter Workspace
+          </Link>
+
+          <blockquote className={victorMono.className}>
+            When in doubt, black it out.
+            <br />— Frank Miller
+          </blockquote>
+        </div>
+      </section>
+    </main>
   );
 }

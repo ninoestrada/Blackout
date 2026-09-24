@@ -10,6 +10,8 @@ export default function Studio() {
       const response = await fetch("/api/passage");
       const text = await response.text();
 
+      console.log("Passage:", text);
+
       setPassage(text);
     }
 

@@ -1,26 +1,98 @@
-@import "tailwindcss";
-
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+.landing {
+  min-height: 100vh;
+  padding: 32px 48px;
+  font-family: monospace;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+.site-title {
+  color: #505050;
+  font-size: 35px;
+  font-weight: 700;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+.marked-word {
+  position: relative;
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+.marked-word::after {
+  content: "";
+  position: absolute;
+
+  left: -2px;
+  right: -2px;
+
+  top: 52%;
+  height: 5px;
+
+  background-color: #505050;
+  transform: rotate(-2deg);
+}
+
+.landing-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.landing-button {
+  display: inline-block;
+  padding: 14px 24px;
+
+  background-color: #505050;
+  color: #f0f0f0;
+  border: 1px solid #505050;
+
+  text-decoration: none;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.landing-content {
+  max-width: 700px;
+  margin: 0 auto;
+  padding-top: 160px;
+  text-align: center;
+}
+
+.landing-content h1 {
+  font-family: monospace;
+  font-size: 64px;
+  line-height: 1.05;
+  margin: 0;
+}
+
+.landing-content p {
+  margin-top: 32px;
+  font-size: 18px;
+  line-height: 1.6;
+}
+
+.landing-actions {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 40px;
+  margin-top: 40px;
+}
+
+.here-text {
+  color: #505050;
+}
+
+.landing-actions a {
+  display: inline-block;
+  padding: 14px 24px;
+
+  background-color: #505050;
+  color: #f0f0f0;
+  border: 1px solid #505050;
+
+  text-decoration: none;
+}
+
+.landing-actions blockquote {
+  margin: 0;
+  text-align: left;
+  font-style: italic;
+  font-size: 14px;
 }
