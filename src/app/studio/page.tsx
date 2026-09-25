@@ -11,6 +11,7 @@ const spaceMono = Space_Mono({
 
 export default function Studio() {
   const [passage, setPassage] = useState("");
+  const [blackedOut, setBlackedOut] = useState<Set<number>>(new Set());
 
   useEffect(() => {
     async function getPassage() {
@@ -23,10 +24,36 @@ export default function Studio() {
     getPassage();
   }, []);
 
+  const words = passage.split(/(\s+)/);
+
+  function toggleWord(index: number) {
+    setBlackedOut((previous) => {
+      const updated = new Set(previous);
+
+      if (updated.has(index)) {
+        updated.delete(index);
+      } else {
+        updated.add(index);
+      }
+
+      return updated;
+    });
+  }
+
   return (
     <main>
       <section className={styles.content}>
-        <p className={`${styles.passage} ${spaceMono.className}`}>{passage}</p>
+        <p className={`${styles.passage} ${spaceMono.className}`}>
+          {words.map((word, index) => (
+            <span
+              key={index}
+              className={blackedOut.has(index) ? styles.blackedOut : ""}
+              onClick={() => toggleWord(index)}
+            >
+              {word}
+            </span>
+          ))}
+        </p>
       </section>
     </main>
   );
