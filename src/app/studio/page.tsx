@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { Space_Mono } from "next/font/google";
+import styles from "./page.module.css";
 
 const spaceMono = Space_Mono({
   subsets: ["latin"],
@@ -16,8 +17,6 @@ export default function Studio() {
       const response = await fetch("/api/passage");
       const text = await response.text();
 
-      console.log("Passage:", text);
-
       setPassage(text);
     }
 
@@ -25,9 +24,9 @@ export default function Studio() {
   }, []);
 
   return (
-    <main className="studio">
-      <section className="studio-content">
-        <p className={spaceMono.className}>{passage}</p>
+    <main>
+      <section className={styles.content}>
+        <p className={`${styles.passage} ${spaceMono.className}`}>{passage}</p>
       </section>
     </main>
   );
