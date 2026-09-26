@@ -4,9 +4,13 @@ export async function GET() {
 
   const data = await response.json();
 
+  type GutenbergBook = {
+    formats: Record<string, string>;
+  };
+
   // Keep Books with Plain-Text 
   const booksWithText = data.results.filter(
-    (book: any) => book.formats["text/plain; charset=utf-8"],
+    (book: GutenbergBook) => book.formats["text/plain; charset=utf-8"],
   );
 
   // Pick Random Book
