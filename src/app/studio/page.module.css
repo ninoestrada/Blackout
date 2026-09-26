@@ -116,3 +116,28 @@
   font-size: 20px;
   cursor: pointer;
 }
+
+.statusMessage {
+  max-width: 800px;
+  min-height: 250px;
+  margin: 0 auto;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.errorContent {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+}
+
+.errorContent p {
+  margin: 0;
+}
+
+.retryButton {
+  margin-top: 0;
+}
