@@ -14,6 +14,9 @@ export default function Studio() {
   const [blackedOut, setBlackedOut] = useState<Set<number>>(new Set());
   const [showConfirmation, setShowConfirmation] = useState(false);
   const [dontShowAgain, setDontShowAgain] = useState(false);
+  const [showCleanSlateConfirmation, setShowCleanSlateConfirmation] =
+    useState(false);
+  const [dontShowCleanSlateAgain, setDontShowCleanSlateAgain] = useState(false);
 
   useEffect(() => {
     async function getPassage() {
@@ -71,9 +74,39 @@ export default function Studio() {
     });
   }
 
+  function cleanSlate() {
+    setBlackedOut(new Set());
+    setShowCleanSlateConfirmation(false);
+  }
+
+  function confirmCleanSlate() {
+    if (dontShowCleanSlateAgain) {
+      localStorage.setItem("skipCleanSlateConfirmation", "true");
+    }
+
+    cleanSlate();
+  }
+
+  function handleCleanSlate() {
+    const skipConfirmation =
+      localStorage.getItem("skipCleanSlateConfirmation") === "true";
+
+    if (blackedOut.size > 0 && !skipConfirmation) {
+      setShowCleanSlateConfirmation(true);
+      return;
+    }
+
+    cleanSlate();
+  }
+
   function closeConfirmation() {
     setShowConfirmation(false);
     setDontShowAgain(false);
+  }
+
+  function closeCleanSlateConfirmation() {
+    setShowCleanSlateConfirmation(false);
+    setDontShowCleanSlateAgain(false);
   }
 
   return (
@@ -93,6 +126,13 @@ export default function Studio() {
 
         {passage && (
           <div className={styles.fragmentActions}>
+            <button
+              className={`${styles.fragmentButton} ${spaceMono.className}`}
+              onClick={handleCleanSlate}
+            >
+              Clean Slate
+            </button>
+
             <button
               className={`${styles.fragmentButton} ${spaceMono.className}`}
               onClick={handleFreshFragment}
@@ -137,6 +177,51 @@ export default function Studio() {
                 <button
                   className={`${styles.modalButton} ${spaceMono.className}`}
                   onClick={confirmFreshFragment}
+                >
+                  Continue
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {showCleanSlateConfirmation && (
+          <div className={styles.modalOverlay}>
+            <div className={`${styles.modal} ${spaceMono.className}`}>
+              <button
+                className={styles.closeButton}
+                onClick={closeCleanSlateConfirmation}
+                aria-label="Close"
+              >
+                ×
+              </button>
+
+              <h2>Clear your blackout?</h2>
+
+              <p>Your current blackout marks will be cleared.</p>
+
+              <label className={styles.checkboxLabel}>
+                <input
+                  type="checkbox"
+                  checked={dontShowCleanSlateAgain}
+                  onChange={(event) =>
+                    setDontShowCleanSlateAgain(event.target.checked)
+                  }
+                />
+                Don&apos;t show this again
+              </label>
+
+              <div className={styles.modalActions}>
+                <button
+                  className={`${styles.modalButton} ${spaceMono.className}`}
+                  onClick={closeCleanSlateConfirmation}
+                >
+                  Cancel
+                </button>
+
+                <button
+                  className={`${styles.modalButton} ${spaceMono.className}`}
+                  onClick={confirmCleanSlate}
                 >
                   Continue
                 </button>
