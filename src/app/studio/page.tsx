@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { Space_Mono } from "next/font/google";
 import styles from "./page.module.css";
+import ConfirmationModal from "./ConfirmationModal";
 
 const spaceMono = Space_Mono({
   subsets: ["latin"],
@@ -143,91 +144,25 @@ export default function Studio() {
         )}
 
         {showConfirmation && (
-          <div className={styles.modalOverlay}>
-            <div className={`${styles.modal} ${spaceMono.className}`}>
-              <button
-                className={styles.closeButton}
-                onClick={closeConfirmation}
-                aria-label="Close"
-              >
-                ×
-              </button>
-
-              <h2>Start a fresh fragment?</h2>
-
-              <p>Your current blackout poem will be cleared.</p>
-
-              <label className={styles.checkboxLabel}>
-                <input
-                  type="checkbox"
-                  checked={dontShowAgain}
-                  onChange={(event) => setDontShowAgain(event.target.checked)}
-                />
-                Don&apos;t show this again
-              </label>
-
-              <div className={styles.modalActions}>
-                <button
-                  className={`${styles.modalButton} ${spaceMono.className}`}
-                  onClick={closeConfirmation}
-                >
-                  Cancel
-                </button>
-
-                <button
-                  className={`${styles.modalButton} ${spaceMono.className}`}
-                  onClick={confirmFreshFragment}
-                >
-                  Continue
-                </button>
-              </div>
-            </div>
-          </div>
+          <ConfirmationModal
+            title="Start a fresh fragment?"
+            message="Your current blackout poem will be cleared."
+            dontShowAgain={dontShowAgain}
+            onDontShowAgainChange={setDontShowAgain}
+            onCancel={closeConfirmation}
+            onConfirm={confirmFreshFragment}
+          />
         )}
 
         {showCleanSlateConfirmation && (
-          <div className={styles.modalOverlay}>
-            <div className={`${styles.modal} ${spaceMono.className}`}>
-              <button
-                className={styles.closeButton}
-                onClick={closeCleanSlateConfirmation}
-                aria-label="Close"
-              >
-                ×
-              </button>
-
-              <h2>Clear your blackout?</h2>
-
-              <p>Your current blackout marks will be cleared.</p>
-
-              <label className={styles.checkboxLabel}>
-                <input
-                  type="checkbox"
-                  checked={dontShowCleanSlateAgain}
-                  onChange={(event) =>
-                    setDontShowCleanSlateAgain(event.target.checked)
-                  }
-                />
-                Don&apos;t show this again
-              </label>
-
-              <div className={styles.modalActions}>
-                <button
-                  className={`${styles.modalButton} ${spaceMono.className}`}
-                  onClick={closeCleanSlateConfirmation}
-                >
-                  Cancel
-                </button>
-
-                <button
-                  className={`${styles.modalButton} ${spaceMono.className}`}
-                  onClick={confirmCleanSlate}
-                >
-                  Continue
-                </button>
-              </div>
-            </div>
-          </div>
+          <ConfirmationModal
+            title="Clear your blackout?"
+            message="Your current blackout marks will be cleared."
+            dontShowAgain={dontShowCleanSlateAgain}
+            onDontShowAgainChange={setDontShowCleanSlateAgain}
+            onCancel={closeCleanSlateConfirmation}
+            onConfirm={confirmCleanSlate}
+          />
         )}
       </section>
     </main>
