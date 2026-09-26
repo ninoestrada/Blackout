@@ -12,6 +12,8 @@ const spaceMono = Space_Mono({
 export default function Studio() {
   const [passage, setPassage] = useState("");
   const [blackedOut, setBlackedOut] = useState<Set<number>>(new Set());
+  const [showConfirmation, setShowConfirmation] = useState(false);
+  const [dontShowAgain, setDontShowAgain] = useState(false);
 
   useEffect(() => {
     async function getPassage() {
@@ -23,6 +25,35 @@ export default function Studio() {
 
     getPassage();
   }, []);
+
+  async function getFreshFragment() {
+    const response = await fetch("/api/passage");
+    const text = await response.text();
+
+    setPassage(text);
+    setBlackedOut(new Set());
+    setShowConfirmation(false);
+  }
+
+  function handleFreshFragment() {
+    const skipConfirmation =
+      localStorage.getItem("skipFreshFragmentConfirmation") === "true";
+
+    if (blackedOut.size > 0 && !skipConfirmation) {
+      setShowConfirmation(true);
+      return;
+    }
+
+    getFreshFragment();
+  }
+
+  function confirmFreshFragment() {
+    if (dontShowAgain) {
+      localStorage.setItem("skipFreshFragmentConfirmation", "true");
+    }
+
+    getFreshFragment();
+  }
 
   const words = passage.split(/(\s+)/);
 
@@ -40,6 +71,11 @@ export default function Studio() {
     });
   }
 
+  function closeConfirmation() {
+    setShowConfirmation(false);
+    setDontShowAgain(false);
+  }
+
   return (
     <main>
       <section className={styles.content}>
@@ -54,6 +90,60 @@ export default function Studio() {
             </span>
           ))}
         </p>
+
+        {passage && (
+          <div className={styles.fragmentActions}>
+            <button
+              className={`${styles.fragmentButton} ${spaceMono.className}`}
+              onClick={handleFreshFragment}
+            >
+              Fresh Fragment
+            </button>
+          </div>
+        )}
+
+        {showConfirmation && (
+          <div className={styles.modalOverlay}>
+            <div className={`${styles.modal} ${spaceMono.className}`}>
+              <button
+                className={styles.closeButton}
+                onClick={closeConfirmation}
+                aria-label="Close"
+              >
+                ×
+              </button>
+
+              <h2>Start a fresh fragment?</h2>
+
+              <p>Your current blackout poem will be cleared.</p>
+
+              <label className={styles.checkboxLabel}>
+                <input
+                  type="checkbox"
+                  checked={dontShowAgain}
+                  onChange={(event) => setDontShowAgain(event.target.checked)}
+                />
+                Don&apos;t show this again
+              </label>
+
+              <div className={styles.modalActions}>
+                <button
+                  className={`${styles.modalButton} ${spaceMono.className}`}
+                  onClick={closeConfirmation}
+                >
+                  Cancel
+                </button>
+
+                <button
+                  className={`${styles.modalButton} ${spaceMono.className}`}
+                  onClick={confirmFreshFragment}
+                >
+                  Continue
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </section>
     </main>
   );
