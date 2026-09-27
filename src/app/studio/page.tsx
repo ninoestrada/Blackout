@@ -10,8 +10,20 @@ const spaceMono = Space_Mono({
   weight: ["400", "700"],
 });
 
+async function fetchPassage() {
+  const response = await fetch("/api/passage");
+
+  if (!response.ok) {
+    throw new Error("Failed to load fragment");
+  }
+
+  return response.text();
+}
+
 export default function Studio() {
   const [passage, setPassage] = useState("");
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState("");
   const [blackedOut, setBlackedOut] = useState<Set<number>>(new Set());
   const [showConfirmation, setShowConfirmation] = useState(false);
   const [dontShowAgain, setDontShowAgain] = useState(false);
@@ -21,22 +33,34 @@ export default function Studio() {
 
   useEffect(() => {
     async function getPassage() {
-      const response = await fetch("/api/passage");
-      const text = await response.text();
-
-      setPassage(text);
+      try {
+        const text = await fetchPassage();
+        setPassage(text);
+      } catch {
+        setError("Couldn't load a fragment.");
+      } finally {
+        setIsLoading(false);
+      }
     }
 
     getPassage();
   }, []);
 
   async function getFreshFragment() {
-    const response = await fetch("/api/passage");
-    const text = await response.text();
-
-    setPassage(text);
-    setBlackedOut(new Set());
+    setError("");
+    setIsLoading(true);
     setShowConfirmation(false);
+
+    try {
+      const text = await fetchPassage();
+
+      setPassage(text);
+      setBlackedOut(new Set());
+    } catch {
+      setError("Couldn't load a fragment.");
+    } finally {
+      setIsLoading(false);
+    }
   }
 
   function handleFreshFragment() {
@@ -110,22 +134,59 @@ export default function Studio() {
     setDontShowCleanSlateAgain(false);
   }
 
+  async function retryPassage() {
+    setError("");
+    setIsLoading(true);
+
+    try {
+      const text = await fetchPassage();
+      setPassage(text);
+    } catch {
+      setError("Couldn't load a fragment.");
+    } finally {
+      setIsLoading(false);
+    }
+  }
+
   return (
     <main>
       <section className={styles.content}>
-        <p className={`${styles.passage} ${spaceMono.className}`}>
-          {words.map((word, index) => (
-            <span
-              key={index}
-              className={blackedOut.has(index) ? styles.blackedOut : ""}
-              onClick={() => toggleWord(index)}
-            >
-              {word}
-            </span>
-          ))}
-        </p>
+        {isLoading && (
+          <p className={`${styles.statusMessage} ${spaceMono.className}`}>
+            Loading fragment...
+          </p>
+        )}
 
-        {passage && (
+        {error && (
+          <div className={styles.statusMessage}>
+            <div className={styles.errorContent}>
+              <p className={spaceMono.className}>{error}</p>
+
+              <button
+                className={`${styles.fragmentButton} ${styles.retryButton} ${spaceMono.className}`}
+                onClick={retryPassage}
+              >
+                Retry
+              </button>
+            </div>
+          </div>
+        )}
+
+        {!isLoading && !error && (
+          <p className={`${styles.passage} ${spaceMono.className}`}>
+            {words.map((word, index) => (
+              <span
+                key={index}
+                className={blackedOut.has(index) ? styles.blackedOut : ""}
+                onClick={() => toggleWord(index)}
+              >
+                {word}
+              </span>
+            ))}
+          </p>
+        )}
+
+        {passage && !isLoading && !error && (
           <div className={styles.fragmentActions}>
             <button
               className={`${styles.fragmentButton} ${spaceMono.className}`}
