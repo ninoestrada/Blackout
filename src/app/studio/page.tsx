@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Space_Mono } from "next/font/google";
 import styles from "./page.module.css";
 import ConfirmationModal from "./ConfirmationModal";
@@ -25,11 +25,41 @@ export default function Studio() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState("");
   const [blackedOut, setBlackedOut] = useState<Set<number>>(new Set());
+  const [undoStack, setUndoStack] = useState<Set<number>[]>([]);
+  const [redoStack, setRedoStack] = useState<Set<number>[]>([]);
   const [showConfirmation, setShowConfirmation] = useState(false);
   const [dontShowAgain, setDontShowAgain] = useState(false);
   const [showCleanSlateConfirmation, setShowCleanSlateConfirmation] =
     useState(false);
   const [dontShowCleanSlateAgain, setDontShowCleanSlateAgain] = useState(false);
+
+  const undo = useCallback(() => {
+    if (undoStack.length === 0) {
+      return;
+    }
+
+    const previous = undoStack[undoStack.length - 1];
+
+    setRedoStack((history) => [...history, new Set(blackedOut)]);
+
+    setBlackedOut(new Set(previous));
+
+    setUndoStack((history) => history.slice(0, -1));
+  }, [blackedOut, undoStack]);
+
+  const redo = useCallback(() => {
+    if (redoStack.length === 0) {
+      return;
+    }
+
+    const next = redoStack[redoStack.length - 1];
+
+    setUndoStack((history) => [...history, new Set(blackedOut)]);
+
+    setBlackedOut(new Set(next));
+
+    setRedoStack((history) => history.slice(0, -1));
+  }, [blackedOut, redoStack]);
 
   useEffect(() => {
     async function getPassage() {
@@ -46,6 +76,28 @@ export default function Studio() {
     getPassage();
   }, []);
 
+  useEffect(() => {
+    function handleKeyDown(event: KeyboardEvent) {
+      const modifier = event.metaKey || event.ctrlKey;
+
+      if (modifier && event.key.toLowerCase() === "z") {
+        event.preventDefault();
+
+        if (event.shiftKey) {
+          redo();
+        } else {
+          undo();
+        }
+      }
+    }
+
+    window.addEventListener("keydown", handleKeyDown);
+
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [undo, redo]);
+
   async function getFreshFragment() {
     setError("");
     setIsLoading(true);
@@ -56,6 +108,8 @@ export default function Studio() {
 
       setPassage(text);
       setBlackedOut(new Set());
+      setUndoStack([]);
+      setRedoStack([]);
     } catch {
       setError("Couldn't load a fragment.");
     } finally {
@@ -83,23 +137,28 @@ export default function Studio() {
     getFreshFragment();
   }
 
-  const words = passage.split(/(\s+)/);
-
   function toggleWord(index: number) {
-    setBlackedOut((previous) => {
-      const updated = new Set(previous);
+    const previous = new Set(blackedOut);
 
-      if (updated.has(index)) {
-        updated.delete(index);
-      } else {
-        updated.add(index);
-      }
+    setUndoStack((history) => [...history, previous]);
+    setRedoStack([]);
 
-      return updated;
-    });
+    const updated = new Set(blackedOut);
+
+    if (updated.has(index)) {
+      updated.delete(index);
+    } else {
+      updated.add(index);
+    }
+
+    setBlackedOut(updated);
   }
 
   function cleanSlate() {
+    setUndoStack((history) => [...history, new Set(blackedOut)]);
+
+    setRedoStack([]);
+
     setBlackedOut(new Set());
     setShowCleanSlateConfirmation(false);
   }
@@ -113,10 +172,14 @@ export default function Studio() {
   }
 
   function handleCleanSlate() {
+    if (blackedOut.size === 0) {
+      return;
+    }
+
     const skipConfirmation =
       localStorage.getItem("skipCleanSlateConfirmation") === "true";
 
-    if (blackedOut.size > 0 && !skipConfirmation) {
+    if (!skipConfirmation) {
       setShowCleanSlateConfirmation(true);
       return;
     }
@@ -147,6 +210,8 @@ export default function Studio() {
       setIsLoading(false);
     }
   }
+
+  const words = passage.split(/(\s+)/);
 
   return (
     <main>
@@ -188,6 +253,22 @@ export default function Studio() {
 
         {passage && !isLoading && !error && (
           <div className={styles.fragmentActions}>
+            <button
+              className={`${styles.fragmentButton} ${spaceMono.className}`}
+              onClick={undo}
+              disabled={undoStack.length === 0}
+            >
+              Undo
+            </button>
+
+            <button
+              className={`${styles.fragmentButton} ${spaceMono.className}`}
+              onClick={redo}
+              disabled={redoStack.length === 0}
+            >
+              Redo
+            </button>
+
             <button
               className={`${styles.fragmentButton} ${spaceMono.className}`}
               onClick={handleCleanSlate}
