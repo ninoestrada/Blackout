@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Space_Mono } from "next/font/google";
 import "./globals.css";
+import AuthButton from "@/components/AuthButton";
 
 const spaceMono = Space_Mono({
   subsets: ["latin"],
@@ -25,9 +26,7 @@ export default function RootLayout({
             <span className="marked-word">black</span>out
           </div>
 
-          <button className={`landing-button ${spaceMono.className}`}>
-            Sign in
-          </button>
+          <AuthButton />
         </header>
 
         {children}
