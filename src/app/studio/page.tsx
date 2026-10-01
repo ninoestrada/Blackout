@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { Space_Mono } from "next/font/google";
+import { supabase } from "@/lib/supabase";
 import styles from "./page.module.css";
 import ConfirmationModal from "./ConfirmationModal";
 
@@ -32,6 +33,7 @@ export default function Studio() {
   const [showCleanSlateConfirmation, setShowCleanSlateConfirmation] =
     useState(false);
   const [dontShowCleanSlateAgain, setDontShowCleanSlateAgain] = useState(false);
+  const [saveMessage, setSaveMessage] = useState("");
 
   const undo = useCallback(() => {
     if (undoStack.length === 0) {
@@ -211,6 +213,33 @@ export default function Studio() {
     }
   }
 
+  async function handleSave() {
+    const { data, error } = await supabase.auth.getUser();
+
+    if (error || !data.user) {
+      console.error("You must be signed in to save a poem.");
+      setSaveMessage("Sign in to save your poem.");
+      return;
+    }
+
+    const user = data.user;
+    const blackoutData = Array.from(blackedOut);
+
+    const { error: saveError } = await supabase.from("poems").insert({
+      user_id: user.id,
+      source_text: passage,
+      blackout_data: blackoutData,
+    });
+
+    if (saveError) {
+      console.error("Error saving poem:", saveError);
+      setSaveMessage("Couldn't save your poem.");
+      return;
+    }
+
+    setSaveMessage("Poem saved.");
+  }
+
   const words = passage.split(/(\s+)/);
 
   return (
@@ -252,37 +281,50 @@ export default function Studio() {
         )}
 
         {passage && !isLoading && !error && (
-          <div className={styles.fragmentActions}>
-            <button
-              className={`${styles.fragmentButton} ${spaceMono.className}`}
-              onClick={undo}
-              disabled={undoStack.length === 0}
-            >
-              Undo
-            </button>
+          <>
+            <div className={styles.fragmentActions}>
+              <button
+                className={`${styles.fragmentButton} ${spaceMono.className}`}
+                onClick={handleSave}
+              >
+                Save
+              </button>
 
-            <button
-              className={`${styles.fragmentButton} ${spaceMono.className}`}
-              onClick={redo}
-              disabled={redoStack.length === 0}
-            >
-              Redo
-            </button>
+              <button
+                className={`${styles.fragmentButton} ${spaceMono.className}`}
+                onClick={undo}
+                disabled={undoStack.length === 0}
+              >
+                Undo
+              </button>
 
-            <button
-              className={`${styles.fragmentButton} ${spaceMono.className}`}
-              onClick={handleCleanSlate}
-            >
-              Clean Slate
-            </button>
+              <button
+                className={`${styles.fragmentButton} ${spaceMono.className}`}
+                onClick={redo}
+                disabled={redoStack.length === 0}
+              >
+                Redo
+              </button>
 
-            <button
-              className={`${styles.fragmentButton} ${spaceMono.className}`}
-              onClick={handleFreshFragment}
-            >
-              Fresh Fragment
-            </button>
-          </div>
+              <button
+                className={`${styles.fragmentButton} ${spaceMono.className}`}
+                onClick={handleCleanSlate}
+              >
+                Clean Slate
+              </button>
+
+              <button
+                className={`${styles.fragmentButton} ${spaceMono.className}`}
+                onClick={handleFreshFragment}
+              >
+                Fresh Fragment
+              </button>
+            </div>
+
+            {saveMessage && (
+              <p className={spaceMono.className}>{saveMessage}</p>
+            )}
+          </>
         )}
 
         {showConfirmation && (
