@@ -1,0 +1,52 @@
+.content {
+  max-width: 800px;
+  margin: 0 auto;
+  padding-top: 160px;
+}
+
+.heading {
+  margin: 0 0 40px;
+  font-size: 32px;
+  font-weight: 700;
+}
+
+.poemList {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 24px;
+}
+
+.poem {
+  min-width: 0;
+}
+
+.poem h2 {
+  margin: 12px 0 4px;
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.poem p {
+  margin: 0;
+  font-size: 14px;
+}
+
+.statusMessage {
+  margin: 0;
+  font-size: 16px;
+}
+
+.preview {
+  height: 220px;
+  overflow: hidden;
+  padding: 20px;
+  border: 1px solid #505050;
+  font-size: 12px;
+  line-height: 1.6;
+  text-align: left;
+}
+
+.blackedOut {
+  background-color: #505050;
+  color: #505050;
+}
