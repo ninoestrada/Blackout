@@ -57,6 +57,7 @@ export default function SavedStudio({
 
   return (
     <Studio
+      poemId={poem.id}
       initialPassage={poem.source_text}
       initialBlackout={poem.blackout_data}
     />
