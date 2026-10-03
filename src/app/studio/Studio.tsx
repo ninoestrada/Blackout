@@ -22,11 +22,13 @@ async function fetchPassage() {
 }
 
 type StudioProps = {
+  poemId?: string;
   initialPassage?: string;
   initialBlackout?: number[];
 };
 
 export default function Studio({
+  poemId,
   initialPassage,
   initialBlackout = [],
 }: StudioProps) {
@@ -240,19 +242,36 @@ export default function Studio({
     const user = data.user;
     const blackoutData = Array.from(blackedOut);
 
-    const { error: saveError } = await supabase.from("poems").insert({
-      user_id: user.id,
-      source_text: passage,
-      blackout_data: blackoutData,
-    });
+    let saveError;
+
+    if (poemId) {
+      const { error } = await supabase
+        .from("poems")
+        .update({
+          blackout_data: blackoutData,
+        })
+        .eq("id", poemId);
+
+      saveError = error;
+    } else {
+      const { error } = await supabase.from("poems").insert({
+        user_id: user.id,
+        source_text: passage,
+        blackout_data: blackoutData,
+      });
+
+      saveError = error;
+    }
 
     if (saveError) {
       console.error("Error saving poem:", saveError);
-      setSaveMessage("Couldn't save your poem.");
+      setSaveMessage(
+        poemId ? "Couldn't save your changes." : "Couldn't save your poem.",
+      );
       return;
     }
 
-    setSaveMessage("Poem saved.");
+    setSaveMessage(poemId ? "Changes saved." : "Poem saved.");
   }
 
   const words = passage.split(/(\s+)/);
@@ -302,7 +321,7 @@ export default function Studio({
                 className={`${styles.fragmentButton} ${spaceMono.className}`}
                 onClick={handleSave}
               >
-                Save
+                {poemId ? "Save Changes" : "Save"}
               </button>
 
               <button
@@ -328,12 +347,14 @@ export default function Studio({
                 Clean Slate
               </button>
 
-              <button
-                className={`${styles.fragmentButton} ${spaceMono.className}`}
-                onClick={handleFreshFragment}
-              >
-                Fresh Fragment
-              </button>
+              {!poemId && (
+                <button
+                  className={`${styles.fragmentButton} ${spaceMono.className}`}
+                  onClick={handleFreshFragment}
+                >
+                  Fresh Fragment
+                </button>
+              )}
             </div>
 
             {saveMessage && (
