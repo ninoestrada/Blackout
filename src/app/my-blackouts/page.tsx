@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
+import Link from "next/link";
 import styles from "./page.module.css";
 
 type SavedPoem = {
@@ -72,7 +73,11 @@ export default function MyBlackouts() {
       {!isLoading && isSignedIn && !error && poems.length > 0 && (
         <div className={styles.poemList}>
           {poems.map((poem) => (
-            <div className={styles.poem} key={poem.id}>
+            <Link
+              href={`/studio/${poem.id}`}
+              className={styles.poem}
+              key={poem.id}
+            >
               <div className={styles.preview}>
                 {poem.source_text.split(/(\s+)/).map((part, index) => (
                   <span
@@ -89,6 +94,7 @@ export default function MyBlackouts() {
               </div>
 
               <h2>{poem.title || "Untitled"}</h2>
+
               <p>
                 {new Date(poem.created_at).toLocaleDateString("en-US", {
                   month: "long",
@@ -96,7 +102,7 @@ export default function MyBlackouts() {
                   year: "numeric",
                 })}
               </p>
-            </div>
+            </Link>
           ))}
         </div>
       )}
