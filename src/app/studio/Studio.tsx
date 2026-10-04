@@ -81,6 +81,48 @@ export default function Studio({
       return;
     }
 
+    const authReturn =
+      new URLSearchParams(window.location.search).get("authReturn") === "true";
+
+    const savedStudioState = sessionStorage.getItem(
+      "blackout:studio-before-auth",
+    );
+
+    if (authReturn && savedStudioState) {
+      try {
+        const studioState = JSON.parse(savedStudioState);
+
+        setPassage(studioState.passage);
+        setBlackedOut(new Set(studioState.blackoutData));
+
+        setUndoStack(
+          (studioState.undoStack ?? []).map(
+            (state: number[]) => new Set(state),
+          ),
+        );
+
+        setRedoStack(
+          (studioState.redoStack ?? []).map(
+            (state: number[]) => new Set(state),
+          ),
+        );
+
+        setIsLoading(false);
+
+        setTimeout(() => {
+          sessionStorage.removeItem("blackout:studio-before-auth");
+
+          const url = new URL(window.location.href);
+          url.searchParams.delete("authReturn");
+          window.history.replaceState({}, "", url);
+        }, 0);
+
+        return;
+      } catch {
+        sessionStorage.removeItem("blackout:studio-before-auth");
+      }
+    }
+
     async function getPassage() {
       try {
         const text = await fetchPassage();
@@ -94,6 +136,35 @@ export default function Studio({
 
     getPassage();
   }, [initialPassage]);
+
+  useEffect(() => {
+    function saveStudioStateBeforeAuth() {
+      if (!passage || poemId) {
+        return;
+      }
+
+      const studioState = {
+        passage,
+        blackoutData: Array.from(blackedOut),
+        undoStack: undoStack.map((state) => Array.from(state)),
+        redoStack: redoStack.map((state) => Array.from(state)),
+      };
+
+      sessionStorage.setItem(
+        "blackout:studio-before-auth",
+        JSON.stringify(studioState),
+      );
+    }
+
+    window.addEventListener("blackout:before-auth", saveStudioStateBeforeAuth);
+
+    return () => {
+      window.removeEventListener(
+        "blackout:before-auth",
+        saveStudioStateBeforeAuth,
+      );
+    };
+  }, [passage, blackedOut, undoStack, redoStack, poemId]);
 
   useEffect(() => {
     function handleKeyDown(event: KeyboardEvent) {
