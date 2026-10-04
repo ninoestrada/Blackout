@@ -30,8 +30,18 @@ export default function AuthButton() {
   }, []);
 
   async function handleSignIn() {
+    const returnPath = window.location.pathname + window.location.search;
+
+    window.dispatchEvent(new Event("blackout:before-auth"));
+
+    const callbackUrl = new URL("/auth/callback", window.location.origin);
+    callbackUrl.searchParams.set("next", returnPath);
+
     const { error } = await supabase.auth.signInWithOAuth({
       provider: "google",
+      options: {
+        redirectTo: callbackUrl.toString(),
+      },
     });
 
     if (error) {

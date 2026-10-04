@@ -1,0 +1,27 @@
+import { NextResponse } from "next/server";
+import { createSupabaseServerClient } from "@/lib/supabaseServer";
+
+export async function GET(request: Request) {
+  const requestUrl = new URL(request.url);
+
+  const code = requestUrl.searchParams.get("code");
+  const nextParam = requestUrl.searchParams.get("next");
+
+  const next =
+    nextParam?.startsWith("/") && !nextParam.startsWith("//") ? nextParam : "/";
+
+  if (code) {
+    const supabase = await createSupabaseServerClient();
+
+    const { error } = await supabase.auth.exchangeCodeForSession(code);
+
+    if (!error) {
+      const redirectUrl = new URL(next, requestUrl.origin);
+      redirectUrl.searchParams.set("authReturn", "true");
+
+      return NextResponse.redirect(redirectUrl);
+    }
+  }
+
+  return NextResponse.redirect(new URL("/?authError=true", requestUrl.origin));
+}
