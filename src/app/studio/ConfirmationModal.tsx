@@ -9,8 +9,9 @@ const spaceMono = Space_Mono({
 type ConfirmationModalProps = {
   title: string;
   message: string;
-  dontShowAgain: boolean;
-  onDontShowAgainChange: (checked: boolean) => void;
+  dontShowAgain?: boolean;
+  onDontShowAgainChange?: (checked: boolean) => void;
+  confirmLabel?: string;
   onCancel: () => void;
   onConfirm: () => void;
 };
@@ -20,6 +21,7 @@ export default function ConfirmationModal({
   message,
   dontShowAgain,
   onDontShowAgainChange,
+  confirmLabel = "Continue",
   onCancel,
   onConfirm,
 }: ConfirmationModalProps) {
@@ -38,14 +40,16 @@ export default function ConfirmationModal({
 
         <p>{message}</p>
 
-        <label className={styles.checkboxLabel}>
-          <input
-            type="checkbox"
-            checked={dontShowAgain}
-            onChange={(event) => onDontShowAgainChange(event.target.checked)}
-          />
-          Don&apos;t show this again
-        </label>
+        {dontShowAgain !== undefined && onDontShowAgainChange && (
+          <label className={styles.checkboxLabel}>
+            <input
+              type="checkbox"
+              checked={dontShowAgain}
+              onChange={(event) => onDontShowAgainChange(event.target.checked)}
+            />
+            Don&apos;t show this again
+          </label>
+        )}
 
         <div className={styles.modalActions}>
           <button
@@ -59,7 +63,7 @@ export default function ConfirmationModal({
             className={`${styles.modalButton} ${spaceMono.className}`}
             onClick={onConfirm}
           >
-            Continue
+            {confirmLabel}
           </button>
         </div>
       </div>
