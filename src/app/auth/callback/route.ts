@@ -7,8 +7,15 @@ export async function GET(request: Request) {
   const code = requestUrl.searchParams.get("code");
   const nextParam = requestUrl.searchParams.get("next");
 
-  const next =
-    nextParam?.startsWith("/") && !nextParam.startsWith("//") ? nextParam : "/";
+  let redirectUrl = new URL("/", requestUrl.origin);
+
+  if (nextParam) {
+    const candidateUrl = new URL(nextParam, requestUrl.origin);
+
+    if (candidateUrl.origin === requestUrl.origin) {
+      redirectUrl = candidateUrl;
+    }
+  }
 
   if (code) {
     const supabase = await createSupabaseServerClient();
@@ -16,7 +23,6 @@ export async function GET(request: Request) {
     const { error } = await supabase.auth.exchangeCodeForSession(code);
 
     if (!error) {
-      const redirectUrl = new URL(next, requestUrl.origin);
       redirectUrl.searchParams.set("authReturn", "true");
 
       return NextResponse.redirect(redirectUrl);
