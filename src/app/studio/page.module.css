@@ -149,7 +149,76 @@
   border: 1px solid #505050;
 }
 
-.drawingToolbar .activeTool {
+.drawingToolbar .fragmentButton.activeTool {
   background-color: #505050;
   color: #f0f0f0;
+}
+
+.passageContainer {
+  position: relative;
+}
+
+.drawingCanvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+.drawingCanvasActive {
+  pointer-events: auto;
+  cursor: crosshair;
+}
+
+.markerSizeControl {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.markerSizeInput {
+  width: 48px;
+  padding: 6px 8px;
+  border: 1px solid #505050;
+  background: #f0f0f0;
+  color: #505050;
+  font-size: 14px;
+  text-align: center;
+}
+
+.drawingToolbar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.drawingToolbar .fragmentButton {
+  margin-top: 0;
+  background-color: #f0f0f0;
+  color: #505050;
+  border: 1px solid #505050;
+}
+
+.colorControl,
+.markerSizeControl {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.recentColors {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  width: 106px;
+}
+
+.colorSwatch {
+  width: 18px;
+  height: 18px;
+  padding: 0;
+  border: 1px solid #505050;
+  border-radius: 50%;
+  cursor: pointer;
 }

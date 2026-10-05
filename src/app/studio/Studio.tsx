@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { Space_Mono } from "next/font/google";
 import { supabase } from "@/lib/supabase";
 import styles from "./page.module.css";
@@ -21,6 +21,22 @@ async function fetchPassage() {
   return response.text();
 }
 
+type Point = {
+  x: number;
+  y: number;
+};
+
+type Stroke = {
+  points: Point[];
+  color: string;
+  size: number;
+};
+
+type StudioSnapshot = {
+  blackedOut: Set<number>;
+  strokes: Stroke[];
+};
+
 type StudioProps = {
   poemId?: string;
   initialPassage?: string;
@@ -38,8 +54,8 @@ export default function Studio({
   const [blackedOut, setBlackedOut] = useState<Set<number>>(
     new Set(initialBlackout),
   );
-  const [undoStack, setUndoStack] = useState<Set<number>[]>([]);
-  const [redoStack, setRedoStack] = useState<Set<number>[]>([]);
+  const [undoStack, setUndoStack] = useState<StudioSnapshot[]>([]);
+  const [redoStack, setRedoStack] = useState<StudioSnapshot[]>([]);
   const [showConfirmation, setShowConfirmation] = useState(false);
   const [dontShowAgain, setDontShowAgain] = useState(false);
   const [showCleanSlateConfirmation, setShowCleanSlateConfirmation] =
@@ -47,6 +63,12 @@ export default function Studio({
   const [dontShowCleanSlateAgain, setDontShowCleanSlateAgain] = useState(false);
   const [saveMessage, setSaveMessage] = useState("");
   const [tool, setTool] = useState<"select" | "draw">("select");
+  const [drawingColor, setDrawingColor] = useState("#505050");
+  const [recentColors, setRecentColors] = useState<string[]>(["#505050"]);
+  const [markerSize, setMarkerSize] = useState(8);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const isDrawingRef = useRef(false);
+  const [strokes, setStrokes] = useState<Stroke[]>([]);
 
   const undo = useCallback(() => {
     if (undoStack.length === 0) {
@@ -55,12 +77,19 @@ export default function Studio({
 
     const previous = undoStack[undoStack.length - 1];
 
-    setRedoStack((history) => [...history, new Set(blackedOut)]);
+    setRedoStack((history) => [
+      ...history,
+      {
+        blackedOut: new Set(blackedOut),
+        strokes,
+      },
+    ]);
 
-    setBlackedOut(new Set(previous));
+    setBlackedOut(new Set(previous.blackedOut));
+    setStrokes(previous.strokes);
 
     setUndoStack((history) => history.slice(0, -1));
-  }, [blackedOut, undoStack]);
+  }, [blackedOut, strokes, undoStack]);
 
   const redo = useCallback(() => {
     if (redoStack.length === 0) {
@@ -69,12 +98,19 @@ export default function Studio({
 
     const next = redoStack[redoStack.length - 1];
 
-    setUndoStack((history) => [...history, new Set(blackedOut)]);
+    setUndoStack((history) => [
+      ...history,
+      {
+        blackedOut: new Set(blackedOut),
+        strokes,
+      },
+    ]);
 
-    setBlackedOut(new Set(next));
+    setBlackedOut(new Set(next.blackedOut));
+    setStrokes(next.strokes);
 
     setRedoStack((history) => history.slice(0, -1));
-  }, [blackedOut, redoStack]);
+  }, [blackedOut, strokes, redoStack]);
 
   useEffect(() => {
     if (initialPassage) {
@@ -95,16 +131,23 @@ export default function Studio({
 
         setPassage(studioState.passage);
         setBlackedOut(new Set(studioState.blackoutData));
+        setStrokes(studioState.strokes ?? []);
 
         setUndoStack(
           (studioState.undoStack ?? []).map(
-            (state: number[]) => new Set(state),
+            (snapshot: { blackoutData: number[]; strokes: Stroke[] }) => ({
+              blackedOut: new Set(snapshot.blackoutData),
+              strokes: snapshot.strokes ?? [],
+            }),
           ),
         );
 
         setRedoStack(
           (studioState.redoStack ?? []).map(
-            (state: number[]) => new Set(state),
+            (snapshot: { blackoutData: number[]; strokes: Stroke[] }) => ({
+              blackedOut: new Set(snapshot.blackoutData),
+              strokes: snapshot.strokes ?? [],
+            }),
           ),
         );
 
@@ -147,8 +190,17 @@ export default function Studio({
       const studioState = {
         passage,
         blackoutData: Array.from(blackedOut),
-        undoStack: undoStack.map((state) => Array.from(state)),
-        redoStack: redoStack.map((state) => Array.from(state)),
+        strokes,
+
+        undoStack: undoStack.map((snapshot) => ({
+          blackoutData: Array.from(snapshot.blackedOut),
+          strokes: snapshot.strokes,
+        })),
+
+        redoStack: redoStack.map((snapshot) => ({
+          blackoutData: Array.from(snapshot.blackedOut),
+          strokes: snapshot.strokes,
+        })),
       };
 
       sessionStorage.setItem(
@@ -165,11 +217,19 @@ export default function Studio({
         saveStudioStateBeforeAuth,
       );
     };
-  }, [passage, blackedOut, undoStack, redoStack, poemId]);
+  }, [passage, blackedOut, strokes, undoStack, redoStack, poemId]);
 
   useEffect(() => {
     function handleKeyDown(event: KeyboardEvent) {
       const modifier = event.metaKey || event.ctrlKey;
+      const target = event.target as HTMLElement;
+
+      const isTyping =
+        target.tagName === "INPUT" || target.tagName === "TEXTAREA";
+
+      if (isTyping) {
+        return;
+      }
 
       if (modifier && event.key.toLowerCase() === "z") {
         event.preventDefault();
@@ -179,6 +239,17 @@ export default function Studio({
         } else {
           undo();
         }
+        if (tool === "draw") {
+          if (event.key === "[") {
+            event.preventDefault();
+            setMarkerSize((size) => Math.max(1, size - 1));
+          }
+
+          if (event.key === "]") {
+            event.preventDefault();
+            setMarkerSize((size) => Math.min(100, size + 1));
+          }
+        }
       }
     }
 
@@ -187,7 +258,54 @@ export default function Studio({
     return () => {
       window.removeEventListener("keydown", handleKeyDown);
     };
-  }, [undo, redo]);
+  }, [undo, redo, tool]);
+
+  useEffect(() => {
+    const canvas = canvasRef.current;
+
+    if (!canvas) {
+      return;
+    }
+
+    canvas.width = canvas.clientWidth;
+    canvas.height = canvas.clientHeight;
+  }, [passage]);
+
+  useEffect(() => {
+    const canvas = canvasRef.current;
+
+    if (!canvas) {
+      return;
+    }
+
+    const context = canvas.getContext("2d");
+
+    if (!context) {
+      return;
+    }
+
+    context.clearRect(0, 0, canvas.width, canvas.height);
+
+    for (const stroke of strokes) {
+      if (stroke.points.length === 0) {
+        continue;
+      }
+
+      context.beginPath();
+      context.strokeStyle = stroke.color;
+      context.lineWidth = stroke.size;
+      context.lineCap = "round";
+      context.lineJoin = "round";
+
+      context.moveTo(stroke.points[0].x, stroke.points[0].y);
+
+      for (const point of stroke.points.slice(1)) {
+        context.lineTo(point.x, point.y);
+      }
+
+      context.stroke();
+    }
+  }, [strokes, passage]);
 
   async function getFreshFragment() {
     setError("");
@@ -199,6 +317,7 @@ export default function Studio({
 
       setPassage(text);
       setBlackedOut(new Set());
+      setStrokes([]);
       setUndoStack([]);
       setRedoStack([]);
     } catch {
@@ -212,7 +331,7 @@ export default function Studio({
     const skipConfirmation =
       localStorage.getItem("skipFreshFragmentConfirmation") === "true";
 
-    if (blackedOut.size > 0 && !skipConfirmation) {
+    if ((blackedOut.size > 0 || strokes.length > 0) && !skipConfirmation) {
       setShowConfirmation(true);
       return;
     }
@@ -229,7 +348,10 @@ export default function Studio({
   }
 
   function toggleWord(index: number) {
-    const previous = new Set(blackedOut);
+    const previous: StudioSnapshot = {
+      blackedOut: new Set(blackedOut),
+      strokes,
+    };
 
     setUndoStack((history) => [...history, previous]);
     setRedoStack([]);
@@ -246,11 +368,17 @@ export default function Studio({
   }
 
   function cleanSlate() {
-    setUndoStack((history) => [...history, new Set(blackedOut)]);
+    const previous: StudioSnapshot = {
+      blackedOut: new Set(blackedOut),
+      strokes,
+    };
 
+    setUndoStack((history) => [...history, previous]);
     setRedoStack([]);
 
     setBlackedOut(new Set());
+    setStrokes([]);
+
     setShowCleanSlateConfirmation(false);
   }
 
@@ -263,7 +391,7 @@ export default function Studio({
   }
 
   function handleCleanSlate() {
-    if (blackedOut.size === 0) {
+    if (blackedOut.size === 0 && strokes.length === 0) {
       return;
     }
 
@@ -348,6 +476,98 @@ export default function Studio({
 
   const words = passage.split(/(\s+)/);
 
+  function startDrawing(event: React.PointerEvent<HTMLCanvasElement>) {
+    const canvas = canvasRef.current;
+
+    if (!canvas) {
+      return;
+    }
+
+    const context = canvas.getContext("2d");
+
+    if (!context) {
+      return;
+    }
+
+    // Add the color being used to recent colors
+    setRecentColors((colors) =>
+      [
+        drawingColor,
+        ...colors.filter((recentColor) => recentColor !== drawingColor),
+      ].slice(0, 5),
+    );
+
+    const previous: StudioSnapshot = {
+      blackedOut: new Set(blackedOut),
+      strokes,
+    };
+
+    setUndoStack((history) => [...history, previous]);
+    setRedoStack([]);
+
+    isDrawingRef.current = true;
+
+    const rect = canvas.getBoundingClientRect();
+    const x = event.clientX - rect.left;
+    const y = event.clientY - rect.top;
+
+    const newStroke: Stroke = {
+      points: [{ x, y }],
+      color: drawingColor,
+      size: markerSize,
+    };
+
+    setStrokes((currentStrokes) => [...currentStrokes, newStroke]);
+
+    context.beginPath();
+    context.moveTo(x, y);
+  }
+
+  function draw(event: React.PointerEvent<HTMLCanvasElement>) {
+    if (!isDrawingRef.current) {
+      return;
+    }
+
+    const canvas = canvasRef.current;
+
+    if (!canvas) {
+      return;
+    }
+
+    const context = canvas.getContext("2d");
+
+    if (!context) {
+      return;
+    }
+
+    const rect = canvas.getBoundingClientRect();
+    const x = event.clientX - rect.left;
+    const y = event.clientY - rect.top;
+
+    setStrokes((currentStrokes) => {
+      const updatedStrokes = [...currentStrokes];
+      const currentStroke = updatedStrokes[updatedStrokes.length - 1];
+
+      if (!currentStroke) {
+        return currentStrokes;
+      }
+
+      updatedStrokes[updatedStrokes.length - 1] = {
+        ...currentStroke,
+        points: [...currentStroke.points, { x, y }],
+      };
+
+      return updatedStrokes;
+    });
+
+    context.lineTo(x, y);
+    context.stroke();
+  }
+
+  function stopDrawing() {
+    isDrawingRef.current = false;
+  }
+
   return (
     <main>
       <section className={styles.content}>
@@ -391,25 +611,90 @@ export default function Studio({
             >
               Draw
             </button>
+
+            {tool === "draw" && (
+              <>
+                <div className={styles.colorControl}>
+                  <span className={spaceMono.className}>Color</span>
+
+                  <input
+                    type="color"
+                    value={drawingColor}
+                    onChange={(event) => {
+                      setDrawingColor(event.target.value);
+                    }}
+                    aria-label="Drawing color"
+                  />
+
+                  <div className={styles.recentColors}>
+                    {recentColors.map((color) => (
+                      <button
+                        key={color}
+                        type="button"
+                        className={styles.colorSwatch}
+                        style={{ backgroundColor: color }}
+                        onClick={() => setDrawingColor(color)}
+                        aria-label={`Use color ${color}`}
+                      />
+                    ))}
+                  </div>
+                </div>
+
+                <div className={styles.markerSizeControl}>
+                  <span className={spaceMono.className}>Size</span>
+
+                  <input
+                    className={`${styles.markerSizeInput} ${spaceMono.className}`}
+                    type="number"
+                    min="1"
+                    max="100"
+                    value={markerSize}
+                    onChange={(event) => {
+                      const size = Number(event.target.value);
+
+                      if (size >= 1 && size <= 100) {
+                        setMarkerSize(size);
+                      }
+                    }}
+                    aria-label="Marker size"
+                  />
+
+                  <span className={spaceMono.className}>px</span>
+                </div>
+              </>
+            )}
           </div>
         )}
 
         {!isLoading && !error && (
-          <p className={`${styles.passage} ${spaceMono.className}`}>
-            {words.map((word, index) => (
-              <span
-                key={index}
-                className={blackedOut.has(index) ? styles.blackedOut : ""}
-                onClick={() => {
-                  if (tool === "select") {
-                    toggleWord(index);
-                  }
-                }}
-              >
-                {word}
-              </span>
-            ))}
-          </p>
+          <div className={styles.passageContainer}>
+            <p className={`${styles.passage} ${spaceMono.className}`}>
+              {words.map((word, index) => (
+                <span
+                  key={index}
+                  className={blackedOut.has(index) ? styles.blackedOut : ""}
+                  onClick={() => {
+                    if (tool === "select") {
+                      toggleWord(index);
+                    }
+                  }}
+                >
+                  {word}
+                </span>
+              ))}
+            </p>
+
+            <canvas
+              ref={canvasRef}
+              className={`${styles.drawingCanvas} ${
+                tool === "draw" ? styles.drawingCanvasActive : ""
+              }`}
+              onPointerDown={startDrawing}
+              onPointerMove={draw}
+              onPointerUp={stopDrawing}
+              onPointerLeave={stopDrawing}
+            />
+          </div>
         )}
 
         {passage && !isLoading && !error && (
