@@ -132,3 +132,24 @@
 .retryButton {
   margin-top: 0;
 }
+
+.activeTool {
+  background: #505050;
+  color: #f0f0f0;
+}
+
+.drawingToolbar {
+  display: flex;
+  gap: 12px;
+}
+
+.drawingToolbar .fragmentButton {
+  background-color: #f0f0f0;
+  color: #505050;
+  border: 1px solid #505050;
+}
+
+.drawingToolbar .activeTool {
+  background-color: #505050;
+  color: #f0f0f0;
+}

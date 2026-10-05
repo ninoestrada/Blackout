@@ -46,6 +46,7 @@ export default function Studio({
     useState(false);
   const [dontShowCleanSlateAgain, setDontShowCleanSlateAgain] = useState(false);
   const [saveMessage, setSaveMessage] = useState("");
+  const [tool, setTool] = useState<"select" | "draw">("select");
 
   const undo = useCallback(() => {
     if (undoStack.length === 0) {
@@ -371,13 +372,39 @@ export default function Studio({
           </div>
         )}
 
+        {passage && !isLoading && !error && (
+          <div className={styles.drawingToolbar}>
+            <button
+              className={`${styles.fragmentButton} ${
+                tool === "select" ? styles.activeTool : ""
+              } ${spaceMono.className}`}
+              onClick={() => setTool("select")}
+            >
+              Select
+            </button>
+
+            <button
+              className={`${styles.fragmentButton} ${
+                tool === "draw" ? styles.activeTool : ""
+              } ${spaceMono.className}`}
+              onClick={() => setTool("draw")}
+            >
+              Draw
+            </button>
+          </div>
+        )}
+
         {!isLoading && !error && (
           <p className={`${styles.passage} ${spaceMono.className}`}>
             {words.map((word, index) => (
               <span
                 key={index}
                 className={blackedOut.has(index) ? styles.blackedOut : ""}
-                onClick={() => toggleWord(index)}
+                onClick={() => {
+                  if (tool === "select") {
+                    toggleWord(index);
+                  }
+                }}
               >
                 {word}
               </span>
