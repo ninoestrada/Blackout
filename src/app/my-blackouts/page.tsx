@@ -6,7 +6,9 @@ import Link from "next/link";
 import { Ellipsis, Trash2 } from "lucide-react";
 import styles from "./page.module.css";
 import ConfirmationModal from "../studio/ConfirmationModal";
+import { type DrawingData, type Stroke } from "../studio/Studio";
 import { Space_Mono } from "next/font/google";
+import DrawingPreview from "./DrawingPreview";
 
 const spaceMono = Space_Mono({
   subsets: ["latin"],
@@ -18,6 +20,7 @@ type SavedPoem = {
   title: string | null;
   source_text: string;
   blackout_data: number[];
+  drawing_data: Stroke[] | DrawingData;
   created_at: string;
 };
 
@@ -44,7 +47,9 @@ export default function MyBlackouts() {
 
       const { data, error } = await supabase
         .from("poems")
-        .select("id, title, source_text, blackout_data, created_at")
+        .select(
+          "id, title, source_text, blackout_data, drawing_data, created_at",
+        )
         .order("created_at", { ascending: false });
 
       if (error) {
@@ -140,18 +145,38 @@ export default function MyBlackouts() {
             <div className={styles.poem} key={poem.id}>
               <Link href={`/studio/${poem.id}`} className={styles.poemLink}>
                 <div className={styles.preview}>
-                  {poem.source_text.split(/(\s+)/).map((part, index) => (
-                    <span
-                      key={index}
-                      className={
-                        poem.blackout_data.includes(index)
-                          ? styles.blackedOut
-                          : ""
+                  <div className={styles.previewArtwork}>
+                    {poem.source_text.split(/(\s+)/).map((part, index) => (
+                      <span
+                        key={index}
+                        className={
+                          poem.blackout_data.includes(index)
+                            ? styles.blackedOut
+                            : ""
+                        }
+                      >
+                        {part}
+                      </span>
+                    ))}
+
+                    <DrawingPreview
+                      strokes={
+                        Array.isArray(poem.drawing_data)
+                          ? poem.drawing_data
+                          : poem.drawing_data.strokes
                       }
-                    >
-                      {part}
-                    </span>
-                  ))}
+                      sourceWidth={
+                        Array.isArray(poem.drawing_data)
+                          ? undefined
+                          : poem.drawing_data.width
+                      }
+                      sourceHeight={
+                        Array.isArray(poem.drawing_data)
+                          ? undefined
+                          : poem.drawing_data.height
+                      }
+                    />
+                  </div>
                 </div>
 
                 <h2>{poem.title || "Untitled"}</h2>

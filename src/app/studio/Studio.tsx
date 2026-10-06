@@ -27,10 +27,16 @@ type Point = {
   y: number;
 };
 
-type Stroke = {
+export type Stroke = {
   points: Point[];
   color: string;
   size: number;
+};
+
+export type DrawingData = {
+  width: number;
+  height: number;
+  strokes: Stroke[];
 };
 
 type StudioSnapshot = {
@@ -42,12 +48,14 @@ type StudioProps = {
   poemId?: string;
   initialPassage?: string;
   initialBlackout?: number[];
+  initialDrawing?: Stroke[];
 };
 
 export default function Studio({
   poemId,
-  initialPassage,
+  initialPassage = "",
   initialBlackout = [],
+  initialDrawing = [],
 }: StudioProps) {
   const [passage, setPassage] = useState(initialPassage ?? "");
   const [isLoading, setIsLoading] = useState(true);
@@ -71,7 +79,7 @@ export default function Studio({
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const colorInputRef = useRef<HTMLInputElement>(null);
   const isDrawingRef = useRef(false);
-  const [strokes, setStrokes] = useState<Stroke[]>([]);
+  const [strokes, setStrokes] = useState<Stroke[]>(initialDrawing);
 
   const undo = useCallback(() => {
     if (undoStack.length === 0) {
@@ -304,14 +312,6 @@ export default function Studio({
 
     canvas.width = canvas.clientWidth;
     canvas.height = canvas.clientHeight;
-  }, [passage]);
-
-  useEffect(() => {
-    const canvas = canvasRef.current;
-
-    if (!canvas) {
-      return;
-    }
 
     const context = canvas.getContext("2d");
 
@@ -340,7 +340,7 @@ export default function Studio({
 
       context.stroke();
     }
-  }, [strokes, passage]);
+  }, [strokes, passage, isLoading]);
 
   async function getFreshFragment() {
     setError("");
@@ -476,6 +476,13 @@ export default function Studio({
 
     const user = data.user;
     const blackoutData = Array.from(blackedOut);
+    const canvas = canvasRef.current;
+
+    const drawingData: DrawingData = {
+      width: canvas?.clientWidth ?? 0,
+      height: canvas?.clientHeight ?? 0,
+      strokes,
+    };
 
     let saveError;
 
@@ -484,6 +491,7 @@ export default function Studio({
         .from("poems")
         .update({
           blackout_data: blackoutData,
+          drawing_data: drawingData,
         })
         .eq("id", poemId);
 
@@ -493,6 +501,7 @@ export default function Studio({
         user_id: user.id,
         source_text: passage,
         blackout_data: blackoutData,
+        drawing_data: drawingData,
       });
 
       saveError = error;

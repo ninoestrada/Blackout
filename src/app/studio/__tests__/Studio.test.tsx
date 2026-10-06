@@ -1,6 +1,6 @@
 import { cleanup, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { afterEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import Studio from "../Studio";
 import styles from "../page.module.css";
 
@@ -25,6 +25,20 @@ vi.mock("next/font/google", () => ({
     className: "mock-space-mono",
   }),
 }));
+
+beforeEach(() => {
+  vi.spyOn(HTMLCanvasElement.prototype, "getContext").mockReturnValue({
+    clearRect: vi.fn(),
+    beginPath: vi.fn(),
+    moveTo: vi.fn(),
+    lineTo: vi.fn(),
+    stroke: vi.fn(),
+    save: vi.fn(),
+    restore: vi.fn(),
+    scale: vi.fn(),
+    setTransform: vi.fn(),
+  } as unknown as CanvasRenderingContext2D);
+});
 
 afterEach(() => {
   cleanup();
@@ -106,6 +120,11 @@ describe("Studio", () => {
       user_id: "test-user-123",
       source_text: "The moon crossed the quiet water",
       blackout_data: [2],
+      drawing_data: {
+        width: 0,
+        height: 0,
+        strokes: [],
+      },
     });
   });
 
