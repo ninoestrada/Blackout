@@ -239,16 +239,17 @@ export default function Studio({
         } else {
           undo();
         }
-        if (tool === "draw") {
-          if (event.key === "[") {
-            event.preventDefault();
-            setMarkerSize((size) => Math.max(1, size - 1));
-          }
+      }
 
-          if (event.key === "]") {
-            event.preventDefault();
-            setMarkerSize((size) => Math.min(100, size + 1));
-          }
+      if (tool === "draw") {
+        if (event.key === "[") {
+          event.preventDefault();
+          setMarkerSize((size) => Math.max(1, size - 1));
+        }
+
+        if (event.key === "]") {
+          event.preventDefault();
+          setMarkerSize((size) => Math.min(100, size + 1));
         }
       }
     }
