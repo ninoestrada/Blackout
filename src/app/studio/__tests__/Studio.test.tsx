@@ -1,4 +1,4 @@
-import { cleanup, render, screen } from "@testing-library/react";
+import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import Studio from "../Studio";
@@ -91,6 +91,88 @@ describe("Studio", () => {
     await user.click(redoButton);
 
     expect(word.className).toContain(styles.blackedOut);
+  });
+
+  it("switches to drawing mode", async () => {
+    const user = userEvent.setup();
+
+    render(<Studio initialPassage="The moon crossed the quiet water" />);
+
+    const drawButton = screen.getByRole("button", { name: "Draw" });
+
+    await user.click(drawButton);
+
+    expect(drawButton.className).toContain(styles.activeTool);
+  });
+
+  it("saves drawing strokes for a signed-in user", async () => {
+    const user = userEvent.setup();
+
+    mockGetUser.mockResolvedValue({
+      data: {
+        user: {
+          id: "test-user-123",
+        },
+      },
+      error: null,
+    });
+
+    mockInsert.mockResolvedValue({
+      error: null,
+    });
+
+    const { container } = render(
+      <Studio initialPassage="The moon crossed the quiet water" />,
+    );
+
+    await user.click(screen.getByRole("button", { name: "Draw" }));
+
+    const canvas = container.querySelector("canvas");
+
+    expect(canvas).not.toBeNull();
+
+    if (!canvas) {
+      return;
+    }
+
+    vi.spyOn(canvas, "getBoundingClientRect").mockReturnValue({
+      x: 0,
+      y: 0,
+      width: 800,
+      height: 400,
+      top: 0,
+      right: 800,
+      bottom: 400,
+      left: 0,
+      toJSON: () => {},
+    });
+
+    fireEvent.pointerDown(canvas, {
+      clientX: 100,
+      clientY: 100,
+    });
+
+    fireEvent.pointerMove(canvas, {
+      clientX: 150,
+      clientY: 125,
+    });
+
+    fireEvent.pointerUp(canvas);
+
+    await user.click(screen.getByRole("button", { name: "Save" }));
+
+    expect(mockInsert).toHaveBeenCalledWith(
+      expect.objectContaining({
+        drawing_data: expect.objectContaining({
+          strokes: expect.arrayContaining([
+            expect.objectContaining({
+              color: "#505050",
+              size: 8,
+            }),
+          ]),
+        }),
+      }),
+    );
   });
 
   it("saves a blackout poem for a signed-in user", async () => {
