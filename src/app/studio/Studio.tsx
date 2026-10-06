@@ -5,6 +5,7 @@ import { Space_Mono } from "next/font/google";
 import { supabase } from "@/lib/supabase";
 import styles from "./page.module.css";
 import ConfirmationModal from "./ConfirmationModal";
+import { Highlighter } from "lucide-react";
 
 const spaceMono = Space_Mono({
   subsets: ["latin"],
@@ -66,7 +67,9 @@ export default function Studio({
   const [drawingColor, setDrawingColor] = useState("#505050");
   const [recentColors, setRecentColors] = useState<string[]>(["#505050"]);
   const [markerSize, setMarkerSize] = useState(8);
+  const [cursorPosition, setCursorPosition] = useState<Point | null>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const colorInputRef = useRef<HTMLInputElement>(null);
   const isDrawingRef = useRef(false);
   const [strokes, setStrokes] = useState<Stroke[]>([]);
 
@@ -252,6 +255,37 @@ export default function Studio({
           setMarkerSize((size) => Math.min(100, size + 1));
         }
       }
+
+      if (event.key.toLowerCase() === "s") {
+        setTool("select");
+      }
+
+      if (event.key.toLowerCase() === "d") {
+        setTool("draw");
+      }
+
+      if (tool === "draw" && event.key.toLowerCase() === "c") {
+        const currentIndex = recentColors.indexOf(drawingColor);
+
+        if (event.shiftKey) {
+          const previousIndex =
+            currentIndex <= 0 ? recentColors.length - 1 : currentIndex - 1;
+
+          setDrawingColor(recentColors[previousIndex]);
+        } else {
+          const nextIndex =
+            currentIndex === -1 || currentIndex === recentColors.length - 1
+              ? 0
+              : currentIndex + 1;
+
+          setDrawingColor(recentColors[nextIndex]);
+        }
+      }
+
+      if (tool === "draw" && event.key.toLowerCase() === "p") {
+        event.preventDefault();
+        colorInputRef.current?.click();
+      }
     }
 
     window.addEventListener("keydown", handleKeyDown);
@@ -259,7 +293,7 @@ export default function Studio({
     return () => {
       window.removeEventListener("keydown", handleKeyDown);
     };
-  }, [undo, redo, tool]);
+  }, [undo, redo, tool, recentColors, drawingColor]);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -477,6 +511,21 @@ export default function Studio({
 
   const words = passage.split(/(\s+)/);
 
+  function moveMarkerCursor(event: React.PointerEvent<HTMLCanvasElement>) {
+    const canvas = canvasRef.current;
+
+    if (!canvas) {
+      return;
+    }
+
+    const rect = canvas.getBoundingClientRect();
+
+    setCursorPosition({
+      x: event.clientX - rect.left,
+      y: event.clientY - rect.top,
+    });
+  }
+
   function startDrawing(event: React.PointerEvent<HTMLCanvasElement>) {
     const canvas = canvasRef.current;
 
@@ -619,6 +668,7 @@ export default function Studio({
                   <span className={spaceMono.className}>Color</span>
 
                   <input
+                    ref={colorInputRef}
                     type="color"
                     value={drawingColor}
                     onChange={(event) => {
@@ -691,10 +741,28 @@ export default function Studio({
                 tool === "draw" ? styles.drawingCanvasActive : ""
               }`}
               onPointerDown={startDrawing}
-              onPointerMove={draw}
+              onPointerMove={(event) => {
+                moveMarkerCursor(event);
+                draw(event);
+              }}
               onPointerUp={stopDrawing}
-              onPointerLeave={stopDrawing}
+              onPointerLeave={() => {
+                stopDrawing();
+                setCursorPosition(null);
+              }}
             />
+
+            {tool === "draw" && cursorPosition && (
+              <Highlighter
+                className={styles.markerCursor}
+                size={24}
+                style={{
+                  left: cursorPosition.x,
+                  top: cursorPosition.y,
+                  color: drawingColor,
+                }}
+              />
+            )}
           </div>
         )}
 
