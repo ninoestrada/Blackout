@@ -341,7 +341,6 @@ export default function Studio({
     context.clearRect(0, 0, canvas.width, canvas.height);
 
     const scaleX = drawingWidth > 0 ? canvas.width / drawingWidth : 1;
-
     const scaleY = drawingHeight > 0 ? canvas.height / drawingHeight : 1;
 
     context.save();
@@ -381,6 +380,8 @@ export default function Studio({
       setPassage(text);
       setBlackedOut(new Set());
       setStrokes([]);
+      setDrawingWidth(0);
+      setDrawingHeight(0);
       setUndoStack([]);
       setRedoStack([]);
     } catch {
@@ -569,12 +570,6 @@ export default function Studio({
       return;
     }
 
-    const context = canvas.getContext("2d");
-
-    if (!context) {
-      return;
-    }
-
     // Add the color being used to recent colors
     setRecentColors((colors) =>
       [
@@ -617,9 +612,6 @@ export default function Studio({
     };
 
     setStrokes((currentStrokes) => [...currentStrokes, newStroke]);
-
-    context.beginPath();
-    context.moveTo(x, y);
   }
 
   function draw(event: React.PointerEvent<HTMLCanvasElement>) {
@@ -630,12 +622,6 @@ export default function Studio({
     const canvas = canvasRef.current;
 
     if (!canvas) {
-      return;
-    }
-
-    const context = canvas.getContext("2d");
-
-    if (!context) {
       return;
     }
 
@@ -663,9 +649,6 @@ export default function Studio({
 
       return updatedStrokes;
     });
-
-    context.lineTo(x, y);
-    context.stroke();
   }
 
   function stopDrawing() {

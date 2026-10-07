@@ -145,38 +145,31 @@ export default function MyBlackouts() {
             <div className={styles.poem} key={poem.id}>
               <Link href={`/studio/${poem.id}`} className={styles.poemLink}>
                 <div className={styles.preview}>
-                  <div className={styles.preview}>
-                    {poem.source_text.split(/(\s+)/).map((part, index) => (
-                      <span
-                        key={index}
-                        className={
-                          poem.blackout_data.includes(index)
-                            ? styles.blackedOut
-                            : ""
-                        }
-                      >
-                        {part}
-                      </span>
-                    ))}
+                  {poem.source_text.split(/(\s+)/).map((part, index) => (
+                    <span
+                      key={index}
+                      className={
+                        poem.blackout_data.includes(index)
+                          ? styles.blackedOut
+                          : ""
+                      }
+                    >
+                      {part}
+                    </span>
+                  ))}
 
-                    <DrawingPreview
-                      strokes={
-                        Array.isArray(poem.drawing_data)
-                          ? poem.drawing_data
-                          : poem.drawing_data.strokes
-                      }
-                      sourceWidth={
-                        Array.isArray(poem.drawing_data)
-                          ? undefined
-                          : poem.drawing_data.width
-                      }
-                      sourceHeight={
-                        Array.isArray(poem.drawing_data)
-                          ? undefined
-                          : poem.drawing_data.height
-                      }
-                    />
-                  </div>
+                  <DrawingPreview
+                    strokes={
+                      Array.isArray(poem.drawing_data)
+                        ? poem.drawing_data
+                        : poem.drawing_data.strokes
+                    }
+                    sourceWidth={
+                      Array.isArray(poem.drawing_data)
+                        ? undefined
+                        : poem.drawing_data.width
+                    }
+                  />
                 </div>
 
                 <h2>{poem.title || "Untitled"}</h2>

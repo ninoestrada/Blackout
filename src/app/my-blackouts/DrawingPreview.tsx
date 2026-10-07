@@ -7,13 +7,11 @@ import styles from "./page.module.css";
 type DrawingPreviewProps = {
   strokes: Stroke[];
   sourceWidth?: number;
-  sourceHeight?: number;
 };
 
 export default function DrawingPreview({
   strokes,
   sourceWidth,
-  sourceHeight,
 }: DrawingPreviewProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
@@ -45,13 +43,10 @@ export default function DrawingPreview({
     context.clearRect(0, 0, width, height);
 
     const originalWidth = sourceWidth ?? 800;
-    const originalHeight = sourceHeight ?? height;
-
-    const scaleX = width / originalWidth;
-    const scaleY = height / originalHeight;
+    const scale = width / originalWidth;
 
     context.save();
-    context.scale(scaleX, scaleY);
+    context.scale(scale, scale);
 
     for (const stroke of strokes) {
       if (stroke.points.length === 0) {
@@ -74,7 +69,7 @@ export default function DrawingPreview({
     }
 
     context.restore();
-  }, [strokes, sourceWidth, sourceHeight]);
+  }, [strokes, sourceWidth]);
 
   return <canvas ref={canvasRef} className={styles.drawingPreview} />;
 }

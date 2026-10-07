@@ -190,15 +190,15 @@ describe("Studio", () => {
       setTransform: vi.fn(),
     } as unknown as CanvasRenderingContext2D);
 
-    Object.defineProperty(HTMLCanvasElement.prototype, "clientWidth", {
-      configurable: true,
-      value: 400,
-    });
+    vi.spyOn(HTMLCanvasElement.prototype, "clientWidth", "get").mockReturnValue(
+      400,
+    );
 
-    Object.defineProperty(HTMLCanvasElement.prototype, "clientHeight", {
-      configurable: true,
-      value: 200,
-    });
+    vi.spyOn(
+      HTMLCanvasElement.prototype,
+      "clientHeight",
+      "get",
+    ).mockReturnValue(200);
 
     render(
       <Studio

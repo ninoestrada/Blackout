@@ -56,17 +56,15 @@ export default function SavedStudio({
     return null;
   }
 
-  const isLegacyDrawing = Array.isArray(poem.drawing_data);
-
-  const initialDrawing = isLegacyDrawing
+  const initialDrawing = Array.isArray(poem.drawing_data)
     ? poem.drawing_data
     : poem.drawing_data.strokes;
 
-  const initialDrawingWidth = isLegacyDrawing
+  const initialDrawingWidth = Array.isArray(poem.drawing_data)
     ? undefined
     : poem.drawing_data.width;
 
-  const initialDrawingHeight = isLegacyDrawing
+  const initialDrawingHeight = Array.isArray(poem.drawing_data)
     ? undefined
     : poem.drawing_data.height;
 
