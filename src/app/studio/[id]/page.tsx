@@ -61,7 +61,7 @@ export default function SavedStudio({
     : poem.drawing_data.strokes;
 
   const initialDrawingWidth = Array.isArray(poem.drawing_data)
-    ? undefined
+    ? 800
     : poem.drawing_data.width;
 
   const initialDrawingHeight = Array.isArray(poem.drawing_data)
