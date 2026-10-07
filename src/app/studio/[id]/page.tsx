@@ -2,12 +2,13 @@
 
 import { use, useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
-import Studio from "../Studio";
+import Studio, { type DrawingData, type Stroke } from "../Studio";
 
 type SavedPoem = {
   id: string;
   source_text: string;
   blackout_data: number[];
+  drawing_data: Stroke[] | DrawingData;
 };
 
 export default function SavedStudio({
@@ -25,7 +26,7 @@ export default function SavedStudio({
     async function fetchPoem() {
       const { data, error } = await supabase
         .from("poems")
-        .select("id, source_text, blackout_data")
+        .select("id, source_text, blackout_data, drawing_data")
         .eq("id", id)
         .single();
 
@@ -55,11 +56,26 @@ export default function SavedStudio({
     return null;
   }
 
+  const initialDrawing = Array.isArray(poem.drawing_data)
+    ? poem.drawing_data
+    : poem.drawing_data.strokes;
+
+  const initialDrawingWidth = Array.isArray(poem.drawing_data)
+    ? 800
+    : poem.drawing_data.width;
+
+  const initialDrawingHeight = Array.isArray(poem.drawing_data)
+    ? undefined
+    : poem.drawing_data.height;
+
   return (
     <Studio
       poemId={poem.id}
       initialPassage={poem.source_text}
       initialBlackout={poem.blackout_data}
+      initialDrawing={initialDrawing}
+      initialDrawingWidth={initialDrawingWidth}
+      initialDrawingHeight={initialDrawingHeight}
     />
   );
 }
