@@ -56,9 +56,19 @@ export default function SavedStudio({
     return null;
   }
 
-  const initialDrawing = Array.isArray(poem.drawing_data)
+  const isLegacyDrawing = Array.isArray(poem.drawing_data);
+
+  const initialDrawing = isLegacyDrawing
     ? poem.drawing_data
     : poem.drawing_data.strokes;
+
+  const initialDrawingWidth = isLegacyDrawing
+    ? undefined
+    : poem.drawing_data.width;
+
+  const initialDrawingHeight = isLegacyDrawing
+    ? undefined
+    : poem.drawing_data.height;
 
   return (
     <Studio
@@ -66,6 +76,8 @@ export default function SavedStudio({
       initialPassage={poem.source_text}
       initialBlackout={poem.blackout_data}
       initialDrawing={initialDrawing}
+      initialDrawingWidth={initialDrawingWidth}
+      initialDrawingHeight={initialDrawingHeight}
     />
   );
 }

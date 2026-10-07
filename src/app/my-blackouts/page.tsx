@@ -145,7 +145,7 @@ export default function MyBlackouts() {
             <div className={styles.poem} key={poem.id}>
               <Link href={`/studio/${poem.id}`} className={styles.poemLink}>
                 <div className={styles.preview}>
-                  <div className={styles.previewArtwork}>
+                  <div className={styles.preview}>
                     {poem.source_text.split(/(\s+)/).map((part, index) => (
                       <span
                         key={index}

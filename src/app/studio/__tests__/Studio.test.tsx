@@ -175,6 +175,52 @@ describe("Studio", () => {
     );
   });
 
+  it("scales a saved drawing from its original canvas dimensions", () => {
+    const scale = vi.fn();
+
+    vi.spyOn(HTMLCanvasElement.prototype, "getContext").mockReturnValue({
+      clearRect: vi.fn(),
+      beginPath: vi.fn(),
+      moveTo: vi.fn(),
+      lineTo: vi.fn(),
+      stroke: vi.fn(),
+      save: vi.fn(),
+      restore: vi.fn(),
+      scale,
+      setTransform: vi.fn(),
+    } as unknown as CanvasRenderingContext2D);
+
+    Object.defineProperty(HTMLCanvasElement.prototype, "clientWidth", {
+      configurable: true,
+      value: 400,
+    });
+
+    Object.defineProperty(HTMLCanvasElement.prototype, "clientHeight", {
+      configurable: true,
+      value: 200,
+    });
+
+    render(
+      <Studio
+        initialPassage="The moon crossed the quiet water"
+        initialDrawing={[
+          {
+            points: [
+              { x: 100, y: 100 },
+              { x: 200, y: 150 },
+            ],
+            color: "#505050",
+            size: 8,
+          },
+        ]}
+        initialDrawingWidth={800}
+        initialDrawingHeight={400}
+      />,
+    );
+
+    expect(scale).toHaveBeenCalledWith(0.5, 0.5);
+  });
+
   it("saves a blackout poem for a signed-in user", async () => {
     const user = userEvent.setup();
 

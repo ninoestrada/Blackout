@@ -49,6 +49,8 @@ type StudioProps = {
   initialPassage?: string;
   initialBlackout?: number[];
   initialDrawing?: Stroke[];
+  initialDrawingWidth?: number;
+  initialDrawingHeight?: number;
 };
 
 export default function Studio({
@@ -56,6 +58,8 @@ export default function Studio({
   initialPassage = "",
   initialBlackout = [],
   initialDrawing = [],
+  initialDrawingWidth,
+  initialDrawingHeight,
 }: StudioProps) {
   const [passage, setPassage] = useState(initialPassage ?? "");
   const [isLoading, setIsLoading] = useState(true);
@@ -80,6 +84,8 @@ export default function Studio({
   const colorInputRef = useRef<HTMLInputElement>(null);
   const isDrawingRef = useRef(false);
   const [strokes, setStrokes] = useState<Stroke[]>(initialDrawing);
+  const [drawingWidth, setDrawingWidth] = useState(initialDrawingWidth ?? 0);
+  const [drawingHeight, setDrawingHeight] = useState(initialDrawingHeight ?? 0);
 
   const undo = useCallback(() => {
     if (undoStack.length === 0) {
@@ -143,6 +149,8 @@ export default function Studio({
         setPassage(studioState.passage);
         setBlackedOut(new Set(studioState.blackoutData));
         setStrokes(studioState.strokes ?? []);
+        setDrawingWidth(studioState.drawingWidth ?? 0);
+        setDrawingHeight(studioState.drawingHeight ?? 0);
 
         setUndoStack(
           (studioState.undoStack ?? []).map(
@@ -202,6 +210,8 @@ export default function Studio({
         passage,
         blackoutData: Array.from(blackedOut),
         strokes,
+        drawingWidth,
+        drawingHeight,
 
         undoStack: undoStack.map((snapshot) => ({
           blackoutData: Array.from(snapshot.blackedOut),
@@ -228,7 +238,16 @@ export default function Studio({
         saveStudioStateBeforeAuth,
       );
     };
-  }, [passage, blackedOut, strokes, undoStack, redoStack, poemId]);
+  }, [
+    passage,
+    blackedOut,
+    strokes,
+    drawingWidth,
+    drawingHeight,
+    undoStack,
+    redoStack,
+    poemId,
+  ]);
 
   useEffect(() => {
     function handleKeyDown(event: KeyboardEvent) {
@@ -321,6 +340,13 @@ export default function Studio({
 
     context.clearRect(0, 0, canvas.width, canvas.height);
 
+    const scaleX = drawingWidth > 0 ? canvas.width / drawingWidth : 1;
+
+    const scaleY = drawingHeight > 0 ? canvas.height / drawingHeight : 1;
+
+    context.save();
+    context.scale(scaleX, scaleY);
+
     for (const stroke of strokes) {
       if (stroke.points.length === 0) {
         continue;
@@ -340,7 +366,9 @@ export default function Studio({
 
       context.stroke();
     }
-  }, [strokes, passage, isLoading]);
+
+    context.restore();
+  }, [strokes, passage, isLoading, drawingWidth, drawingHeight]);
 
   async function getFreshFragment() {
     setError("");
@@ -476,11 +504,10 @@ export default function Studio({
 
     const user = data.user;
     const blackoutData = Array.from(blackedOut);
-    const canvas = canvasRef.current;
 
     const drawingData: DrawingData = {
-      width: canvas?.clientWidth ?? 0,
-      height: canvas?.clientHeight ?? 0,
+      width: drawingWidth,
+      height: drawingHeight,
       strokes,
     };
 
@@ -567,8 +594,21 @@ export default function Studio({
     isDrawingRef.current = true;
 
     const rect = canvas.getBoundingClientRect();
-    const x = event.clientX - rect.left;
-    const y = event.clientY - rect.top;
+
+    const coordinateWidth = drawingWidth || rect.width;
+    const coordinateHeight = drawingHeight || rect.height;
+
+    if (drawingWidth === 0) {
+      setDrawingWidth(rect.width);
+    }
+
+    if (drawingHeight === 0) {
+      setDrawingHeight(rect.height);
+    }
+
+    const x = ((event.clientX - rect.left) / rect.width) * coordinateWidth;
+
+    const y = ((event.clientY - rect.top) / rect.height) * coordinateHeight;
 
     const newStroke: Stroke = {
       points: [{ x, y }],
@@ -600,8 +640,13 @@ export default function Studio({
     }
 
     const rect = canvas.getBoundingClientRect();
-    const x = event.clientX - rect.left;
-    const y = event.clientY - rect.top;
+
+    const coordinateWidth = drawingWidth || rect.width;
+    const coordinateHeight = drawingHeight || rect.height;
+
+    const x = ((event.clientX - rect.left) / rect.width) * coordinateWidth;
+
+    const y = ((event.clientY - rect.top) / rect.height) * coordinateHeight;
 
     setStrokes((currentStrokes) => {
       const updatedStrokes = [...currentStrokes];
