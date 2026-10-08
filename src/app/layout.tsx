@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { Space_Mono } from "next/font/google";
 import "./globals.css";
 import AuthButton from "@/components/AuthButton";
@@ -20,11 +21,11 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body>
+      <body className={spaceMono.className}>
         <header className="landing-header">
-          <div className={`site-title ${spaceMono.className}`}>
+          <Link href="/" className="site-title">
             <span className="marked-word">black</span>out
-          </div>
+          </Link>
 
           <AuthButton />
         </header>

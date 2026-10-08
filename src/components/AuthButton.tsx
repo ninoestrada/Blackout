@@ -1,14 +1,9 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Space_Mono } from "next/font/google";
 import type { User } from "@supabase/supabase-js";
+import Link from "next/link";
 import { supabase } from "@/lib/supabase";
-
-const spaceMono = Space_Mono({
-  subsets: ["latin"],
-  weight: ["400", "700"],
-});
 
 export default function AuthButton() {
   const [user, setUser] = useState<User | null>(null);
@@ -57,23 +52,31 @@ export default function AuthButton() {
     }
   }
 
-  if (user) {
-    return (
-      <button
-        className={`landing-button ${spaceMono.className}`}
-        onClick={handleSignOut}
-      >
-        Sign out
-      </button>
-    );
-  }
-
   return (
-    <button
-      className={`landing-button ${spaceMono.className}`}
-      onClick={handleSignIn}
-    >
-      Sign in
-    </button>
+    <nav className="account-nav" aria-label="Main navigation">
+      <Link href="/studio" className="nav-link">
+        Studio
+      </Link>
+
+      {user && (
+        <Link href="/my-blackouts" className="nav-link">
+          My Blackouts
+        </Link>
+      )}
+
+      {user ? (
+        <button
+          type="button"
+          className="landing-button"
+          onClick={handleSignOut}
+        >
+          Sign out
+        </button>
+      ) : (
+        <button type="button" className="landing-button" onClick={handleSignIn}>
+          Sign in
+        </button>
+      )}
+    </nav>
   );
 }

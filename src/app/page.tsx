@@ -1,10 +1,5 @@
 import Link from "next/link";
-import { Space_Mono, Victor_Mono } from "next/font/google";
-
-const spaceMono = Space_Mono({
-  subsets: ["latin"],
-  weight: ["400", "700"],
-});
+import { Victor_Mono } from "next/font/google";
 
 const victorMono = Victor_Mono({
   subsets: ["latin"],
@@ -16,7 +11,7 @@ export default function Home() {
   return (
     <main className="landing">
       <section className="landing-content">
-        <h1 className={spaceMono.className}>
+        <h1>
           Start blackout
           <br />
           poetry. <u className="here-text">Here.</u>
@@ -31,10 +26,7 @@ export default function Home() {
         </p>
 
         <div className="landing-actions">
-          <Link
-            href="/studio"
-            className={`landing-button ${spaceMono.className}`}
-          >
+          <Link href="/studio" className="landing-button">
             Enter Workspace
           </Link>
 

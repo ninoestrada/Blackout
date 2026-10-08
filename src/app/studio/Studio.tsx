@@ -1,16 +1,10 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { Space_Mono } from "next/font/google";
 import { supabase } from "@/lib/supabase";
 import styles from "./page.module.css";
 import ConfirmationModal from "./ConfirmationModal";
 import { Highlighter } from "lucide-react";
-
-const spaceMono = Space_Mono({
-  subsets: ["latin"],
-  weight: ["400", "700"],
-});
 
 async function fetchPassage() {
   const response = await fetch("/api/passage");
@@ -74,7 +68,7 @@ export default function Studio({
   const [showCleanSlateConfirmation, setShowCleanSlateConfirmation] =
     useState(false);
   const [dontShowCleanSlateAgain, setDontShowCleanSlateAgain] = useState(false);
-  const [saveMessage, setSaveMessage] = useState("");
+  const [saveMessage, setSaveMessage] = useState<string | null>(null);
   const [tool, setTool] = useState<"select" | "draw">("select");
   const [drawingColor, setDrawingColor] = useState("#505050");
   const [recentColors, setRecentColors] = useState<string[]>(["#505050"]);
@@ -128,6 +122,18 @@ export default function Studio({
 
     setRedoStack((history) => history.slice(0, -1));
   }, [blackedOut, strokes, redoStack]);
+
+  useEffect(() => {
+    if (!saveMessage) {
+      return;
+    }
+
+    const timeout = setTimeout(() => {
+      setSaveMessage(null);
+    }, 3000);
+
+    return () => clearTimeout(timeout);
+  }, [saveMessage]);
 
   useEffect(() => {
     if (initialPassage) {
@@ -658,19 +664,23 @@ export default function Studio({
   return (
     <main>
       <section className={styles.content}>
+        {saveMessage && (
+          <div className={styles.toast} role="status">
+            {saveMessage}
+          </div>
+        )}
+
         {isLoading && (
-          <p className={`${styles.statusMessage} ${spaceMono.className}`}>
-            Loading fragment...
-          </p>
+          <p className={styles.statusMessage}>Loading fragment...</p>
         )}
 
         {error && (
           <div className={styles.statusMessage}>
             <div className={styles.errorContent}>
-              <p className={spaceMono.className}>{error}</p>
+              <p>{error}</p>
 
               <button
-                className={`${styles.fragmentButton} ${styles.retryButton} ${spaceMono.className}`}
+                className={`${styles.fragmentButton} ${styles.retryButton}`}
                 onClick={retryPassage}
               >
                 Retry
@@ -680,176 +690,197 @@ export default function Studio({
         )}
 
         {passage && !isLoading && !error && (
-          <div className={styles.drawingToolbar}>
-            <button
-              className={`${styles.fragmentButton} ${
-                tool === "select" ? styles.activeTool : ""
-              } ${spaceMono.className}`}
-              onClick={() => setTool("select")}
-            >
-              Select
-            </button>
+          <div className={styles.studioLayout}>
+            <aside className={styles.toolPanel}>
+              <div className={styles.toolSection}>
+                <span className={styles.toolLabel}>Tools</span>
 
-            <button
-              className={`${styles.fragmentButton} ${
-                tool === "draw" ? styles.activeTool : ""
-              } ${spaceMono.className}`}
-              onClick={() => setTool("draw")}
-            >
-              Draw
-            </button>
+                <div className={styles.toolButtons}>
+                  <button
+                    type="button"
+                    className={`${styles.toolButton} ${
+                      tool === "select" ? styles.activeTool : ""
+                    }`}
+                    onClick={() => setTool("select")}
+                  >
+                    Select
+                  </button>
 
-            {tool === "draw" && (
-              <>
-                <div className={styles.colorControl}>
-                  <span className={spaceMono.className}>Color</span>
+                  <button
+                    type="button"
+                    className={`${styles.toolButton} ${
+                      tool === "draw" ? styles.activeTool : ""
+                    }`}
+                    onClick={() => setTool("draw")}
+                  >
+                    Draw
+                  </button>
+                </div>
+              </div>
 
-                  <input
-                    ref={colorInputRef}
-                    type="color"
-                    value={drawingColor}
-                    onChange={(event) => {
-                      setDrawingColor(event.target.value);
-                    }}
-                    aria-label="Drawing color"
-                  />
+              {tool === "draw" && (
+                <>
+                  <div className={styles.toolSection}>
+                    <span className={styles.toolLabel}>Color</span>
 
-                  <div className={styles.recentColors}>
-                    {recentColors.map((color) => (
-                      <button
-                        key={color}
-                        type="button"
-                        className={styles.colorSwatch}
-                        style={{ backgroundColor: color }}
-                        onClick={() => setDrawingColor(color)}
-                        aria-label={`Use color ${color}`}
+                    <div className={styles.colorControl}>
+                      <input
+                        ref={colorInputRef}
+                        className={styles.colorInput}
+                        type="color"
+                        value={drawingColor}
+                        onChange={(event) => {
+                          setDrawingColor(event.target.value);
+                        }}
+                        aria-label="Drawing color"
                       />
-                    ))}
+
+                      <div className={styles.recentColors}>
+                        {recentColors.map((color) => (
+                          <button
+                            key={color}
+                            type="button"
+                            className={styles.colorSwatch}
+                            style={{ backgroundColor: color }}
+                            onClick={() => setDrawingColor(color)}
+                            aria-label={`Use color ${color}`}
+                          />
+                        ))}
+                      </div>
+                    </div>
                   </div>
-                </div>
 
-                <div className={styles.markerSizeControl}>
-                  <span className={spaceMono.className}>Size</span>
+                  <div className={styles.toolSection}>
+                    <label className={styles.toolLabel} htmlFor="marker-size">
+                      Marker Size
+                    </label>
 
-                  <input
-                    className={`${styles.markerSizeInput} ${spaceMono.className}`}
-                    type="number"
-                    min="1"
-                    max="100"
-                    value={markerSize}
-                    onChange={(event) => {
-                      const size = Number(event.target.value);
+                    <div className={styles.markerSizeControl}>
+                      <input
+                        id="marker-size"
+                        className={styles.markerSizeInput}
+                        type="number"
+                        min="1"
+                        max="100"
+                        value={markerSize}
+                        onChange={(event) => {
+                          const size = Number(event.target.value);
 
-                      if (size >= 1 && size <= 100) {
-                        setMarkerSize(size);
-                      }
-                    }}
-                    aria-label="Marker size"
-                  />
+                          if (size >= 1 && size <= 100) {
+                            setMarkerSize(size);
+                          }
+                        }}
+                        aria-label="Marker size"
+                      />
 
-                  <span className={spaceMono.className}>px</span>
-                </div>
-              </>
-            )}
-          </div>
-        )}
-
-        {!isLoading && !error && (
-          <div className={styles.passageContainer}>
-            <p className={`${styles.passage} ${spaceMono.className}`}>
-              {words.map((word, index) => (
-                <span
-                  key={index}
-                  className={blackedOut.has(index) ? styles.blackedOut : ""}
-                  onClick={() => {
-                    if (tool === "select") {
-                      toggleWord(index);
-                    }
-                  }}
-                >
-                  {word}
-                </span>
-              ))}
-            </p>
-
-            <canvas
-              ref={canvasRef}
-              className={`${styles.drawingCanvas} ${
-                tool === "draw" ? styles.drawingCanvasActive : ""
-              }`}
-              onPointerDown={startDrawing}
-              onPointerMove={(event) => {
-                moveMarkerCursor(event);
-                draw(event);
-              }}
-              onPointerUp={stopDrawing}
-              onPointerLeave={() => {
-                stopDrawing();
-                setCursorPosition(null);
-              }}
-            />
-
-            {tool === "draw" && cursorPosition && (
-              <Highlighter
-                className={styles.markerCursor}
-                size={24}
-                style={{
-                  left: cursorPosition.x,
-                  top: cursorPosition.y,
-                  color: drawingColor,
-                }}
-              />
-            )}
-          </div>
-        )}
-
-        {passage && !isLoading && !error && (
-          <>
-            <div className={styles.fragmentActions}>
-              <button
-                className={`${styles.fragmentButton} ${spaceMono.className}`}
-                onClick={handleSave}
-              >
-                {poemId ? "Save Changes" : "Save"}
-              </button>
-
-              <button
-                className={`${styles.fragmentButton} ${spaceMono.className}`}
-                onClick={undo}
-                disabled={undoStack.length === 0}
-              >
-                Undo
-              </button>
-
-              <button
-                className={`${styles.fragmentButton} ${spaceMono.className}`}
-                onClick={redo}
-                disabled={redoStack.length === 0}
-              >
-                Redo
-              </button>
-
-              <button
-                className={`${styles.fragmentButton} ${spaceMono.className}`}
-                onClick={handleCleanSlate}
-              >
-                Clean Slate
-              </button>
-
-              {!poemId && (
-                <button
-                  className={`${styles.fragmentButton} ${spaceMono.className}`}
-                  onClick={handleFreshFragment}
-                >
-                  Fresh Fragment
-                </button>
+                      <span>px</span>
+                    </div>
+                  </div>
+                </>
               )}
-            </div>
 
-            {saveMessage && (
-              <p className={spaceMono.className}>{saveMessage}</p>
-            )}
-          </>
+              <div className={styles.toolSection}>
+                <span className={styles.toolLabel}>History</span>
+
+                <div className={styles.historyButtons}>
+                  <button
+                    type="button"
+                    className={styles.toolButton}
+                    onClick={undo}
+                    disabled={undoStack.length === 0}
+                  >
+                    Undo
+                  </button>
+
+                  <button
+                    type="button"
+                    className={styles.toolButton}
+                    onClick={redo}
+                    disabled={redoStack.length === 0}
+                  >
+                    Redo
+                  </button>
+                </div>
+              </div>
+            </aside>
+
+            <div className={styles.workspace}>
+              <div className={styles.passageContainer}>
+                <p className={styles.passage}>
+                  {words.map((word, index) => (
+                    <span
+                      key={index}
+                      className={blackedOut.has(index) ? styles.blackedOut : ""}
+                      onClick={() => {
+                        if (tool === "select") {
+                          toggleWord(index);
+                        }
+                      }}
+                    >
+                      {word}
+                    </span>
+                  ))}
+                </p>
+
+                <canvas
+                  ref={canvasRef}
+                  className={`${styles.drawingCanvas} ${
+                    tool === "draw" ? styles.drawingCanvasActive : ""
+                  }`}
+                  onPointerDown={startDrawing}
+                  onPointerMove={(event) => {
+                    moveMarkerCursor(event);
+                    draw(event);
+                  }}
+                  onPointerUp={stopDrawing}
+                  onPointerLeave={() => {
+                    stopDrawing();
+                    setCursorPosition(null);
+                  }}
+                />
+
+                {tool === "draw" && cursorPosition && (
+                  <Highlighter
+                    className={styles.markerCursor}
+                    size={24}
+                    style={{
+                      left: cursorPosition.x,
+                      top: cursorPosition.y,
+                      color: drawingColor,
+                    }}
+                  />
+                )}
+              </div>
+
+              <div className={styles.fragmentActions}>
+                {!poemId && (
+                  <button
+                    type="button"
+                    className={styles.secondaryButton}
+                    onClick={handleFreshFragment}
+                  >
+                    Fresh Fragment
+                  </button>
+                )}
+
+                <button
+                  type="button"
+                  className={styles.secondaryButton}
+                  onClick={handleCleanSlate}
+                >
+                  Clean Slate
+                </button>
+
+                <button
+                  type="button"
+                  className={styles.primaryButton}
+                  onClick={handleSave}
+                >
+                  {poemId ? "Save Changes" : "Save"}
+                </button>
+              </div>
+            </div>
+          </div>
         )}
 
         {showConfirmation && (
