@@ -484,7 +484,45 @@
     width: 100%;
   }
 
+  /* ---------- Mobile confirmation modal ---------- */
+
+  .modalOverlay {
+    padding: 16px;
+  }
+
   .modal {
-    padding: 24px;
+    width: 100%;
+    min-width: 0;
+    padding: 20px;
+    max-height: calc(100dvh - 32px);
+    overflow-y: auto;
+  }
+
+  .modal h2 {
+    margin-right: 24px;
+    font-size: 18px;
+    line-height: 1.4;
+    overflow-wrap: break-word;
+  }
+
+  .modal p {
+    font-size: 13px;
+  }
+
+  .modalActions {
+    gap: 8px;
+    margin-top: 24px;
+  }
+
+  .modalButton {
+    flex: 1;
+    min-width: 0;
+    padding: 10px 8px;
+    font-size: 12px;
+  }
+
+  .closeButton {
+    top: 12px;
+    right: 12px;
   }
 }
