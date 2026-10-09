@@ -6,6 +6,7 @@ import Studio, { type DrawingData, type Stroke } from "../Studio";
 
 type SavedPoem = {
   id: string;
+  title: string | null;
   source_text: string;
   blackout_data: number[];
   drawing_data: Stroke[] | DrawingData;
@@ -26,7 +27,7 @@ export default function SavedStudio({
     async function fetchPoem() {
       const { data, error } = await supabase
         .from("poems")
-        .select("id, source_text, blackout_data, drawing_data")
+        .select("id, title, source_text, blackout_data, drawing_data")
         .eq("id", id)
         .single();
 
@@ -41,7 +42,7 @@ export default function SavedStudio({
       setIsLoading(false);
     }
 
-    fetchPoem();
+    void fetchPoem();
   }, [id]);
 
   if (isLoading) {
@@ -71,6 +72,7 @@ export default function SavedStudio({
   return (
     <Studio
       poemId={poem.id}
+      initialTitle={poem.title}
       initialPassage={poem.source_text}
       initialBlackout={poem.blackout_data}
       initialDrawing={initialDrawing}

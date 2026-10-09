@@ -526,3 +526,38 @@
     right: 12px;
   }
 }
+
+.poemTitleContainer {
+  width: 100%;
+  margin-bottom: 20px;
+}
+
+.poemTitleInput {
+  width: 100%;
+  padding: 8px 0;
+  border: none;
+  border-bottom: 1px solid transparent;
+  border-radius: 0;
+  background: transparent;
+  color: var(--color-text);
+  font: inherit;
+  font-size: 24px;
+  font-weight: 700;
+  outline: none;
+}
+
+.poemTitleInput:hover,
+.poemTitleInput:focus {
+  border-bottom-color: var(--color-border);
+}
+
+.poemTitleInput::placeholder {
+  color: var(--color-text);
+  opacity: 0.5;
+}
+
+@media (max-width: 600px) {
+  .poemTitleInput {
+    font-size: 20px;
+  }
+}

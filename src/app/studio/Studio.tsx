@@ -40,6 +40,7 @@ type StudioSnapshot = {
 
 type StudioProps = {
   poemId?: string;
+  initialTitle?: string | null;
   initialPassage?: string;
   initialBlackout?: number[];
   initialDrawing?: Stroke[];
@@ -49,6 +50,7 @@ type StudioProps = {
 
 export default function Studio({
   poemId,
+  initialTitle = null,
   initialPassage = "",
   initialBlackout = [],
   initialDrawing = [],
@@ -56,6 +58,7 @@ export default function Studio({
   initialDrawingHeight,
 }: StudioProps) {
   const [passage, setPassage] = useState(initialPassage ?? "");
+  const [title, setTitle] = useState(initialTitle ?? "");
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState("");
   const [blackedOut, setBlackedOut] = useState<Set<number>>(
@@ -153,6 +156,7 @@ export default function Studio({
         const studioState = JSON.parse(savedStudioState);
 
         setPassage(studioState.passage);
+        setTitle(studioState.title ?? "");
         setBlackedOut(new Set(studioState.blackoutData));
         setStrokes(studioState.strokes ?? []);
         setDrawingWidth(studioState.drawingWidth ?? 0);
@@ -203,7 +207,7 @@ export default function Studio({
       }
     }
 
-    getPassage();
+    void getPassage();
   }, [initialPassage]);
 
   useEffect(() => {
@@ -214,6 +218,7 @@ export default function Studio({
 
       const studioState = {
         passage,
+        title,
         blackoutData: Array.from(blackedOut),
         strokes,
         drawingWidth,
@@ -246,6 +251,7 @@ export default function Studio({
     };
   }, [
     passage,
+    title,
     blackedOut,
     strokes,
     drawingWidth,
@@ -397,6 +403,7 @@ export default function Studio({
       const text = await fetchPassage();
 
       setPassage(text);
+      setTitle("");
       setBlackedOut(new Set());
       setStrokes([]);
       setDrawingWidth(0);
@@ -419,7 +426,7 @@ export default function Studio({
       return;
     }
 
-    getFreshFragment();
+    void getFreshFragment();
   }
 
   function confirmFreshFragment() {
@@ -427,7 +434,7 @@ export default function Studio({
       localStorage.setItem("skipFreshFragmentConfirmation", "true");
     }
 
-    getFreshFragment();
+    void getFreshFragment();
   }
 
   function toggleWord(index: number) {
@@ -537,15 +544,18 @@ export default function Studio({
       const { error } = await supabase
         .from("poems")
         .update({
+          title: title.trim() || null,
           blackout_data: blackoutData,
           drawing_data: drawingData,
         })
-        .eq("id", poemId);
+        .eq("id", poemId)
+        .eq("user_id", user.id);
 
       saveError = error;
     } else {
       const { error } = await supabase.from("poems").insert({
         user_id: user.id,
+        title: title.trim() || null,
         source_text: passage,
         blackout_data: blackoutData,
         drawing_data: drawingData,
@@ -621,7 +631,6 @@ export default function Studio({
     }
 
     const x = ((event.clientX - rect.left) / rect.width) * coordinateWidth;
-
     const y = ((event.clientY - rect.top) / rect.height) * coordinateHeight;
 
     const newStroke: Stroke = {
@@ -650,7 +659,6 @@ export default function Studio({
     const coordinateHeight = drawingHeight || rect.height;
 
     const x = ((event.clientX - rect.left) / rect.width) * coordinateWidth;
-
     const y = ((event.clientY - rect.top) / rect.height) * coordinateHeight;
 
     setStrokes((currentStrokes) => {
@@ -818,6 +826,18 @@ export default function Studio({
             </aside>
 
             <div className={styles.workspace}>
+              <div className={styles.poemTitleContainer}>
+                <input
+                  type="text"
+                  className={styles.poemTitleInput}
+                  value={title}
+                  onChange={(event) => setTitle(event.target.value)}
+                  placeholder="Untitled"
+                  aria-label="Poem title"
+                  maxLength={100}
+                />
+              </div>
+
               <div className={styles.passageContainer}>
                 <p className={styles.passage}>
                   {words.map((word, index) => (

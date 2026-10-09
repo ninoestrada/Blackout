@@ -246,6 +246,7 @@ describe("Studio", () => {
 
     expect(mockInsert).toHaveBeenCalledWith({
       user_id: "test-user-123",
+      title: null,
       source_text: "The moon crossed the quiet water",
       blackout_data: [2],
       drawing_data: {
