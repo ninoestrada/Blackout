@@ -257,6 +257,11 @@ export default function Studio({
 
   useEffect(() => {
     function handleKeyDown(event: KeyboardEvent) {
+      // Disable Studio shortcuts while a confirmation dialog is open.
+      if (showConfirmation || showCleanSlateConfirmation) {
+        return;
+      }
+
       const modifier = event.metaKey || event.ctrlKey;
       const target = event.target as HTMLElement;
 
@@ -326,7 +331,15 @@ export default function Studio({
     return () => {
       window.removeEventListener("keydown", handleKeyDown);
     };
-  }, [undo, redo, tool, recentColors, drawingColor]);
+  }, [
+    undo,
+    redo,
+    tool,
+    recentColors,
+    drawingColor,
+    showConfirmation,
+    showCleanSlateConfirmation,
+  ]);
 
   useEffect(() => {
     const canvas = canvasRef.current;
