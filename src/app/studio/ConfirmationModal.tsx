@@ -1,6 +1,12 @@
 "use client";
 
-import { useEffect, useId, useRef } from "react";
+import {
+  useEffect,
+  useId,
+  useRef,
+  type ReactNode,
+  type RefObject,
+} from "react";
 import { Space_Mono } from "next/font/google";
 import styles from "./page.module.css";
 
@@ -17,6 +23,10 @@ type ConfirmationModalProps = {
   confirmLabel?: string;
   onCancel: () => void;
   onConfirm: () => void;
+  children?: ReactNode;
+  initialFocusRef?: RefObject<HTMLInputElement | null>;
+  confirmDisabled?: boolean;
+  isProcessing?: boolean;
 };
 
 export default function ConfirmationModal({
@@ -27,6 +37,10 @@ export default function ConfirmationModal({
   confirmLabel = "Continue",
   onCancel,
   onConfirm,
+  children,
+  initialFocusRef,
+  confirmDisabled = false,
+  isProcessing = false,
 }: ConfirmationModalProps) {
   const titleId = useId();
   const descriptionId = useId();
@@ -34,22 +48,35 @@ export default function ConfirmationModal({
   const dialogRef = useRef<HTMLDivElement>(null);
   const cancelButtonRef = useRef<HTMLButtonElement>(null);
   const onCancelRef = useRef(onCancel);
+  const initialFocusRefRef = useRef(initialFocusRef);
+  const isProcessingRef = useRef(isProcessing);
 
   useEffect(() => {
     onCancelRef.current = onCancel;
-  }, [onCancel]);
+    initialFocusRefRef.current = initialFocusRef;
+    isProcessingRef.current = isProcessing;
+  }, [onCancel, initialFocusRef, isProcessing]);
 
   useEffect(() => {
     const previouslyFocusedElement = document.activeElement;
 
-    // Move keyboard focus into the dialog.
-    cancelButtonRef.current?.focus();
+    // Focus the input for Rename, otherwise focus Cancel.
+    if (initialFocusRefRef.current?.current) {
+      initialFocusRefRef.current.current.focus();
+      initialFocusRefRef.current.current.select();
+    } else {
+      cancelButtonRef.current?.focus();
+    }
 
     function handleKeyDown(event: KeyboardEvent) {
       if (event.key === "Escape") {
         event.preventDefault();
         event.stopPropagation();
-        onCancelRef.current();
+
+        if (!isProcessingRef.current) {
+          onCancelRef.current();
+        }
+
         return;
       }
 
@@ -97,7 +124,10 @@ export default function ConfirmationModal({
     return () => {
       document.removeEventListener("keydown", handleKeyDown, true);
 
-      if (previouslyFocusedElement instanceof HTMLElement) {
+      if (
+        previouslyFocusedElement instanceof HTMLElement &&
+        previouslyFocusedElement.isConnected
+      ) {
         previouslyFocusedElement.focus();
       }
     };
@@ -118,6 +148,7 @@ export default function ConfirmationModal({
           type="button"
           className={styles.closeButton}
           onClick={onCancel}
+          disabled={isProcessing}
           aria-label="Close"
         >
           ×
@@ -126,6 +157,8 @@ export default function ConfirmationModal({
         <h2 id={titleId}>{title}</h2>
 
         <p id={descriptionId}>{message}</p>
+
+        {children}
 
         {dontShowAgain !== undefined && onDontShowAgainChange && (
           <label className={styles.checkboxLabel}>
@@ -144,6 +177,7 @@ export default function ConfirmationModal({
             type="button"
             className={`${styles.modalButton} ${spaceMono.className}`}
             onClick={onCancel}
+            disabled={isProcessing}
           >
             Cancel
           </button>
@@ -152,8 +186,9 @@ export default function ConfirmationModal({
             type="button"
             className={`${styles.modalButton} ${spaceMono.className}`}
             onClick={onConfirm}
+            disabled={confirmDisabled || isProcessing}
           >
-            {confirmLabel}
+            {isProcessing ? "Saving..." : confirmLabel}
           </button>
         </div>
       </div>
