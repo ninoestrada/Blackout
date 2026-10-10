@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { supabase } from "@/lib/supabase";
+import html2canvas from "html2canvas";
 import styles from "./page.module.css";
 import ConfirmationModal from "./ConfirmationModal";
 import { Highlighter } from "lucide-react";
@@ -78,6 +79,8 @@ export default function Studio({
   const [dontShowCleanSlateAgain, setDontShowCleanSlateAgain] = useState(false);
 
   const [saveMessage, setSaveMessage] = useState<string | null>(null);
+  const [exportError, setExportError] = useState<string | null>(null);
+  const [isExporting, setIsExporting] = useState(false);
 
   // Track the poem after its first successful save.
   // Track the poem after its first successful save.
@@ -95,6 +98,7 @@ export default function Studio({
   const [cursorPosition, setCursorPosition] = useState<Point | null>(null);
 
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const poemExportRef = useRef<HTMLDivElement>(null);
   const colorInputRef = useRef<HTMLInputElement>(null);
   const isDrawingRef = useRef(false);
 
@@ -636,6 +640,71 @@ export default function Studio({
     }
   }
 
+  async function handleExport() {
+    const poemElement = poemExportRef.current;
+
+    if (!poemElement) {
+      setExportError("Couldn't export your poem. Please try again.");
+      return;
+    }
+
+    setExportError(null);
+    setIsExporting(true);
+
+    try {
+      await document.fonts?.ready;
+
+      const backgroundColor =
+        getComputedStyle(document.documentElement)
+          .getPropertyValue("--color-background")
+          .trim() || "#f0f0f0";
+
+      const canvas = await html2canvas(poemElement, {
+        backgroundColor,
+        scale: 2,
+        onclone: (clonedDocument) => {
+          const clonedPoem = clonedDocument.querySelector("[data-poem-export]");
+          const titleInput = clonedPoem?.querySelector("input");
+
+          if (clonedPoem) {
+            const poemBounds = poemElement.getBoundingClientRect();
+            clonedPoem.setAttribute(
+              "style",
+              `box-sizing: content-box; width: ${poemBounds.width}px; padding: 64px 64px 80px;`,
+            );
+          }
+
+          if (clonedPoem && titleInput) {
+            const exportedTitle = clonedDocument.createElement("h1");
+            exportedTitle.className = styles.poemExportTitle;
+            exportedTitle.textContent = title.trim() || "Untitled";
+            titleInput.replaceWith(exportedTitle);
+          }
+
+          clonedPoem?.querySelector("[data-poem-ignore]")?.remove();
+        },
+      });
+
+      const filename =
+        title
+          .trim()
+          .replace(/[<>:"/\\|?*\u0000-\u001f]/g, "-")
+          .replace(/[. ]+$/g, "") || "blackout-poem";
+      const downloadLink = document.createElement("a");
+
+      downloadLink.download = `${filename}.png`;
+      downloadLink.href = canvas.toDataURL("image/png");
+      document.body.appendChild(downloadLink);
+      downloadLink.click();
+      downloadLink.remove();
+    } catch (exportError) {
+      console.error("Error exporting poem:", exportError);
+      setExportError("Couldn't export your poem. Please try again.");
+    } finally {
+      setIsExporting(false);
+    }
+  }
+
   const words = passage.split(/(\s+)/);
 
   function moveMarkerCursor(event: React.PointerEvent<HTMLCanvasElement>) {
@@ -749,6 +818,12 @@ export default function Studio({
         {saveMessage && (
           <div className={styles.toast} role="status">
             {saveMessage}
+          </div>
+        )}
+
+        {exportError && (
+          <div className={styles.toast} role="alert">
+            {exportError}
           </div>
         )}
 
@@ -887,63 +962,70 @@ export default function Studio({
             </aside>
 
             <div className={styles.workspace}>
-              <div className={styles.poemTitleContainer}>
-                <input
-                  type="text"
-                  className={styles.poemTitleInput}
-                  value={title}
-                  onChange={(event) => setTitle(event.target.value)}
-                  placeholder="Untitled"
-                  aria-label="Poem title"
-                  maxLength={100}
-                />
-              </div>
+              <div
+                ref={poemExportRef}
+                className={styles.poemExport}
+                data-poem-export
+              >
+                <div className={styles.poemTitleContainer}>
+                  <input
+                    type="text"
+                    className={styles.poemTitleInput}
+                    value={title}
+                    onChange={(event) => setTitle(event.target.value)}
+                    placeholder="Untitled"
+                    aria-label="Poem title"
+                    maxLength={100}
+                  />
+                </div>
 
-              <div className={styles.passageContainer}>
-                <p className={styles.passage}>
-                  {words.map((word, index) => (
-                    <span
-                      key={index}
-                      className={blackedOut.has(index) ? styles.blackedOut : ""}
-                      onClick={() => {
-                        if (tool === "select") {
-                          toggleWord(index);
-                        }
-                      }}
-                    >
-                      {word}
-                    </span>
-                  ))}
-                </p>
+                <div className={styles.passageContainer}>
+                  <p className={styles.passage}>
+                    {words.map((word, index) => (
+                      <span
+                        key={index}
+                        className={blackedOut.has(index) ? styles.blackedOut : ""}
+                        onClick={() => {
+                          if (tool === "select") {
+                            toggleWord(index);
+                          }
+                        }}
+                      >
+                        {word}
+                      </span>
+                    ))}
+                  </p>
 
-                <canvas
-                  ref={canvasRef}
-                  className={`${styles.drawingCanvas} ${
-                    tool === "draw" ? styles.drawingCanvasActive : ""
-                  }`}
-                  onPointerDown={startDrawing}
-                  onPointerMove={(event) => {
-                    moveMarkerCursor(event);
-                    draw(event);
-                  }}
-                  onPointerUp={stopDrawing}
-                  onPointerLeave={() => {
-                    stopDrawing();
-                    setCursorPosition(null);
-                  }}
-                />
-
-                {tool === "draw" && cursorPosition && (
-                  <Highlighter
-                    className={styles.markerCursor}
-                    size={24}
-                    style={{
-                      left: cursorPosition.x,
-                      top: cursorPosition.y,
-                      color: drawingColor,
+                  <canvas
+                    ref={canvasRef}
+                    className={`${styles.drawingCanvas} ${
+                      tool === "draw" ? styles.drawingCanvasActive : ""
+                    }`}
+                    onPointerDown={startDrawing}
+                    onPointerMove={(event) => {
+                      moveMarkerCursor(event);
+                      draw(event);
+                    }}
+                    onPointerUp={stopDrawing}
+                    onPointerLeave={() => {
+                      stopDrawing();
+                      setCursorPosition(null);
                     }}
                   />
-                )}
+
+                  {tool === "draw" && cursorPosition && (
+                    <Highlighter
+                      className={styles.markerCursor}
+                      size={24}
+                      style={{
+                        left: cursorPosition.x,
+                        top: cursorPosition.y,
+                        color: drawingColor,
+                      }}
+                      data-poem-ignore
+                    />
+                  )}
+                </div>
               </div>
 
               <div className={styles.fragmentActions}>
@@ -978,6 +1060,15 @@ export default function Studio({
                     : savedPoemId
                       ? "Save Changes"
                       : "Save"}
+                </button>
+
+                <button
+                  type="button"
+                  className={styles.secondaryButton}
+                  onClick={handleExport}
+                  disabled={isExporting}
+                >
+                  {isExporting ? "Exporting..." : "Export PNG"}
                 </button>
               </div>
             </div>
