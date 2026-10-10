@@ -14,12 +14,17 @@ const {
   mockSingle,
   mockMaybeSingle,
   mockQuery,
+  mockHtml2canvas,
+  mockExportCanvas,
 } = vi.hoisted(() => {
   const mockQuery = {
     eq: vi.fn(),
     select: vi.fn(),
     single: vi.fn(),
     maybeSingle: vi.fn(),
+  };
+  const mockExportCanvas = {
+    toDataURL: vi.fn(() => "data:image/png;base64,exported"),
   };
 
   return {
@@ -32,6 +37,8 @@ const {
     mockSingle: mockQuery.single,
     mockMaybeSingle: mockQuery.maybeSingle,
     mockQuery,
+    mockHtml2canvas: vi.fn(),
+    mockExportCanvas,
   };
 });
 
@@ -44,6 +51,10 @@ vi.mock("@/lib/supabase", () => ({
   },
 }));
 
+vi.mock("html2canvas", () => ({
+  default: mockHtml2canvas,
+}));
+
 vi.mock("next/font/google", () => ({
   Space_Mono: () => ({
     className: "mock-space-mono",
@@ -52,6 +63,7 @@ vi.mock("next/font/google", () => ({
 
 beforeEach(() => {
   vi.clearAllMocks();
+  mockHtml2canvas.mockResolvedValue(mockExportCanvas);
 
   mockFrom.mockReturnValue({
     insert: mockInsert,
@@ -382,6 +394,114 @@ describe("Studio", () => {
     expect(mockUpdate).toHaveBeenCalledTimes(1);
     expect(mockEq).toHaveBeenNthCalledWith(1, "id", "existing-poem");
     expect(mockEq).toHaveBeenNthCalledWith(2, "user_id", "test-user-123");
+  });
+
+  it("exports an unsaved poem as a titled PNG without saving it", async () => {
+    const user = userEvent.setup();
+    const downloadNames: string[] = [];
+    const clickDownload = vi
+      .spyOn(HTMLAnchorElement.prototype, "click")
+      .mockImplementation(function (this: HTMLAnchorElement) {
+        downloadNames.push(this.download);
+      });
+
+    render(<Studio initialPassage="The moon crossed the quiet water" />);
+
+    await user.type(
+      screen.getByRole("textbox", { name: "Poem title" }),
+      "Night Sky",
+    );
+    await user.click(screen.getByText("moon"));
+    await user.click(screen.getByRole("button", { name: "Export PNG" }));
+
+    await vi.waitFor(() => {
+      expect(mockHtml2canvas).toHaveBeenCalledTimes(1);
+      expect(clickDownload).toHaveBeenCalledOnce();
+    });
+
+    const poemElement = mockHtml2canvas.mock.calls[0][0] as HTMLElement;
+    expect(poemElement.dataset.poemExport).toBeDefined();
+    expect(poemElement.querySelector("canvas")).not.toBeNull();
+    expect(poemElement.querySelector(`.${styles.blackedOut}`)).not.toBeNull();
+    expect(poemElement.querySelector("button")).toBeNull();
+
+    expect(mockExportCanvas.toDataURL).toHaveBeenCalledWith("image/png");
+    expect(clickDownload).toHaveBeenCalledOnce();
+    expect(downloadNames).toEqual(["Night Sky.png"]);
+    expect(mockGetUser).not.toHaveBeenCalled();
+    expect(mockFrom).not.toHaveBeenCalled();
+
+    const [, options] = mockHtml2canvas.mock.calls[0] as [
+      HTMLElement,
+      { onclone: (clonedDocument: Document) => void },
+    ];
+    vi.spyOn(poemElement, "getBoundingClientRect").mockReturnValue({
+      x: 0,
+      y: 0,
+      width: 720,
+      height: 240,
+      top: 0,
+      right: 720,
+      bottom: 240,
+      left: 0,
+      toJSON: () => {},
+    });
+    const clonedDocument = document.implementation.createHTMLDocument();
+    clonedDocument.body.innerHTML = poemElement.outerHTML;
+    options.onclone(clonedDocument);
+
+    const clonedPoem = clonedDocument.querySelector<HTMLElement>(
+      "[data-poem-export]",
+    );
+    expect(clonedPoem?.style.boxSizing).toBe("content-box");
+    expect(clonedPoem?.style.width).toBe("720px");
+    expect(clonedPoem?.style.padding).toBe("64px 64px 80px");
+    expect(clonedPoem?.style.height).toBe("");
+    expect(clonedPoem?.querySelector("input")).toBeNull();
+    expect(clonedPoem?.querySelector("h1")?.textContent).toBe("Night Sky");
+    expect(clonedPoem?.querySelector(`.${styles.blackedOut}`)).not.toBeNull();
+    expect(clonedPoem?.querySelector("canvas")).not.toBeNull();
+  });
+
+  it("exports saved poems without requiring authentication", async () => {
+    const user = userEvent.setup();
+    const clickDownload = vi
+      .spyOn(HTMLAnchorElement.prototype, "click")
+      .mockImplementation(function (this: HTMLAnchorElement) {
+        expect(this.download).toBe("blackout-poem.png");
+      });
+
+    render(
+      <Studio
+        poemId="saved-poem"
+        initialPassage="The moon crossed the quiet water"
+      />,
+    );
+
+    await user.click(screen.getByRole("button", { name: "Export PNG" }));
+
+    await vi.waitFor(() => {
+      expect(clickDownload).toHaveBeenCalledOnce();
+    });
+
+    expect(mockGetUser).not.toHaveBeenCalled();
+    expect(mockFrom).not.toHaveBeenCalled();
+  });
+
+  it("shows an error if PNG export fails", async () => {
+    const user = userEvent.setup();
+    vi.spyOn(console, "error").mockImplementation(() => {});
+    mockHtml2canvas.mockRejectedValue(new Error("Capture failed"));
+
+    render(<Studio initialPassage="The moon crossed the quiet water" />);
+
+    await user.click(screen.getByRole("button", { name: "Export PNG" }));
+
+    expect(
+      await screen.findByText("Couldn't export your poem. Please try again."),
+    ).toBeTruthy();
+    expect(mockGetUser).not.toHaveBeenCalled();
+    expect(mockFrom).not.toHaveBeenCalled();
   });
 
   it("shows a loading message while a fragment is being fetched", () => {

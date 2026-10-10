@@ -19,6 +19,10 @@
   min-width: 0;
 }
 
+.poemExport {
+  background-color: var(--color-background);
+}
+
 /* ---------- Tool panel ---------- */
 
 .toolPanel {
@@ -556,8 +560,19 @@
   opacity: 0.5;
 }
 
+.poemExportTitle {
+  margin: 0;
+  padding: 8px 0;
+
+  color: var(--color-text);
+  font: inherit;
+  font-size: 24px;
+  font-weight: 700;
+}
+
 @media (max-width: 600px) {
-  .poemTitleInput {
+  .poemTitleInput,
+  .poemExportTitle {
     font-size: 20px;
   }
 }
