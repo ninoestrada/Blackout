@@ -4,19 +4,43 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import Studio from "../Studio";
 import styles from "../page.module.css";
 
-const { mockGetUser, mockInsert } = vi.hoisted(() => ({
-  mockGetUser: vi.fn(),
-  mockInsert: vi.fn(),
-}));
+const {
+  mockGetUser,
+  mockFrom,
+  mockInsert,
+  mockUpdate,
+  mockEq,
+  mockSelect,
+  mockSingle,
+  mockMaybeSingle,
+  mockQuery,
+} = vi.hoisted(() => {
+  const mockQuery = {
+    eq: vi.fn(),
+    select: vi.fn(),
+    single: vi.fn(),
+    maybeSingle: vi.fn(),
+  };
+
+  return {
+    mockGetUser: vi.fn(),
+    mockFrom: vi.fn(),
+    mockInsert: vi.fn(),
+    mockUpdate: vi.fn(),
+    mockEq: mockQuery.eq,
+    mockSelect: mockQuery.select,
+    mockSingle: mockQuery.single,
+    mockMaybeSingle: mockQuery.maybeSingle,
+    mockQuery,
+  };
+});
 
 vi.mock("@/lib/supabase", () => ({
   supabase: {
     auth: {
       getUser: mockGetUser,
     },
-    from: vi.fn(() => ({
-      insert: mockInsert,
-    })),
+    from: mockFrom,
   },
 }));
 
@@ -27,6 +51,17 @@ vi.mock("next/font/google", () => ({
 }));
 
 beforeEach(() => {
+  vi.clearAllMocks();
+
+  mockFrom.mockReturnValue({
+    insert: mockInsert,
+    update: mockUpdate,
+  });
+  mockInsert.mockReturnValue(mockQuery);
+  mockUpdate.mockReturnValue(mockQuery);
+  mockEq.mockReturnValue(mockQuery);
+  mockSelect.mockReturnValue(mockQuery);
+
   vi.spyOn(HTMLCanvasElement.prototype, "getContext").mockReturnValue({
     clearRect: vi.fn(),
     beginPath: vi.fn(),
@@ -46,6 +81,17 @@ afterEach(() => {
 });
 
 describe("Studio", () => {
+  function signIn() {
+    mockGetUser.mockResolvedValue({
+      data: {
+        user: {
+          id: "test-user-123",
+        },
+      },
+      error: null,
+    });
+  }
+
   it("blacks out a word when the user clicks it", async () => {
     const user = userEvent.setup();
 
@@ -108,18 +154,8 @@ describe("Studio", () => {
   it("saves drawing strokes for a signed-in user", async () => {
     const user = userEvent.setup();
 
-    mockGetUser.mockResolvedValue({
-      data: {
-        user: {
-          id: "test-user-123",
-        },
-      },
-      error: null,
-    });
-
-    mockInsert.mockResolvedValue({
-      error: null,
-    });
+    signIn();
+    mockSingle.mockResolvedValue({ data: { id: "poem-1" }, error: null });
 
     const { container } = render(
       <Studio initialPassage="The moon crossed the quiet water" />,
@@ -224,18 +260,8 @@ describe("Studio", () => {
   it("saves a blackout poem for a signed-in user", async () => {
     const user = userEvent.setup();
 
-    mockGetUser.mockResolvedValue({
-      data: {
-        user: {
-          id: "test-user-123",
-        },
-      },
-      error: null,
-    });
-
-    mockInsert.mockResolvedValue({
-      error: null,
-    });
+    signIn();
+    mockSingle.mockResolvedValue({ data: { id: "poem-1" }, error: null });
 
     render(<Studio initialPassage="The moon crossed the quiet water" />);
 
@@ -243,9 +269,12 @@ describe("Studio", () => {
 
     await user.click(word);
     await user.click(screen.getByRole("button", { name: "Save" }));
+    expect(await screen.findByText("Poem saved.")).toBeTruthy();
 
+    expect(mockInsert).toHaveBeenCalledTimes(1);
     expect(mockInsert).toHaveBeenCalledWith({
       user_id: "test-user-123",
+      title: null,
       source_text: "The moon crossed the quiet water",
       blackout_data: [2],
       drawing_data: {
@@ -254,6 +283,105 @@ describe("Studio", () => {
         strokes: [],
       },
     });
+  });
+
+  it("updates the inserted poem on subsequent saves", async () => {
+    const user = userEvent.setup();
+
+    signIn();
+    mockSingle.mockResolvedValue({ data: { id: "poem-1" }, error: null });
+    mockMaybeSingle.mockResolvedValue({ data: { id: "poem-1" }, error: null });
+
+    render(<Studio initialPassage="The moon crossed the quiet water" />);
+
+    await user.click(screen.getByRole("button", { name: "Save" }));
+    await screen.findByText("Poem saved.");
+
+    await user.click(screen.getByRole("button", { name: "Save Changes" }));
+    expect(await screen.findByText("Changes saved.")).toBeTruthy();
+
+    expect(mockInsert).toHaveBeenCalledTimes(1);
+    expect(mockUpdate).toHaveBeenCalledTimes(1);
+    expect(mockEq).toHaveBeenNthCalledWith(1, "id", "poem-1");
+    expect(mockEq).toHaveBeenNthCalledWith(2, "user_id", "test-user-123");
+  });
+
+  it("does not insert duplicate poems for rapid Save clicks", async () => {
+    signIn();
+
+    let resolveInsert:
+      | ((result: { data: { id: string }; error: null }) => void)
+      | undefined;
+    mockSingle.mockReturnValue(
+      new Promise((resolve) => {
+        resolveInsert = resolve;
+      }),
+    );
+
+    render(<Studio initialPassage="The moon crossed the quiet water" />);
+
+    const saveButton = screen.getByRole("button", { name: "Save" });
+    fireEvent.click(saveButton);
+    fireEvent.click(saveButton);
+
+    expect(mockGetUser).toHaveBeenCalledTimes(1);
+
+    await vi.waitFor(() => {
+      expect(mockInsert).toHaveBeenCalledTimes(1);
+    });
+
+    resolveInsert?.({ data: { id: "poem-1" }, error: null });
+    expect(await screen.findByText("Poem saved.")).toBeTruthy();
+    expect(mockInsert).toHaveBeenCalledTimes(1);
+  });
+
+  it("inserts a new poem after loading a Fresh Fragment", async () => {
+    const user = userEvent.setup();
+
+    signIn();
+    mockSingle
+      .mockResolvedValueOnce({ data: { id: "poem-1" }, error: null })
+      .mockResolvedValueOnce({ data: { id: "poem-2" }, error: null });
+    vi.spyOn(globalThis, "fetch").mockResolvedValue({
+      ok: true,
+      text: async () => "A different fragment",
+    } as Response);
+
+    render(<Studio initialPassage="The moon crossed the quiet water" />);
+
+    await user.click(screen.getByRole("button", { name: "Save" }));
+    await screen.findByText("Poem saved.");
+
+    await user.click(screen.getByRole("button", { name: "Fresh Fragment" }));
+    expect(await screen.findByText("different")).toBeTruthy();
+
+    await user.click(screen.getByRole("button", { name: "Save" }));
+    expect(await screen.findByText("Poem saved.")).toBeTruthy();
+
+    expect(mockInsert).toHaveBeenCalledTimes(2);
+    expect(mockUpdate).not.toHaveBeenCalled();
+  });
+
+  it("updates the specified existing poem without inserting another", async () => {
+    const user = userEvent.setup();
+
+    signIn();
+    mockMaybeSingle.mockResolvedValue({ data: { id: "existing-poem" }, error: null });
+
+    render(
+      <Studio
+        poemId="existing-poem"
+        initialPassage="The moon crossed the quiet water"
+      />,
+    );
+
+    await user.click(screen.getByRole("button", { name: "Save Changes" }));
+    expect(await screen.findByText("Changes saved.")).toBeTruthy();
+
+    expect(mockInsert).not.toHaveBeenCalled();
+    expect(mockUpdate).toHaveBeenCalledTimes(1);
+    expect(mockEq).toHaveBeenNthCalledWith(1, "id", "existing-poem");
+    expect(mockEq).toHaveBeenNthCalledWith(2, "user_id", "test-user-123");
   });
 
   it("shows a loading message while a fragment is being fetched", () => {
