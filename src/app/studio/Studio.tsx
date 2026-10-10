@@ -61,25 +61,43 @@ export default function Studio({
   const [title, setTitle] = useState(initialTitle ?? "");
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState("");
+
   const [blackedOut, setBlackedOut] = useState<Set<number>>(
     new Set(initialBlackout),
   );
+
   const [undoStack, setUndoStack] = useState<StudioSnapshot[]>([]);
   const [redoStack, setRedoStack] = useState<StudioSnapshot[]>([]);
+
   const [showConfirmation, setShowConfirmation] = useState(false);
   const [dontShowAgain, setDontShowAgain] = useState(false);
+
   const [showCleanSlateConfirmation, setShowCleanSlateConfirmation] =
     useState(false);
+
   const [dontShowCleanSlateAgain, setDontShowCleanSlateAgain] = useState(false);
+
   const [saveMessage, setSaveMessage] = useState<string | null>(null);
+
+  // Track the poem after its first successful save.
+  // Track the poem after its first successful save.
+  const [savedPoemId, setSavedPoemId] = useState<string | null>(poemId ?? null);
+
+  console.log("Studio rendered:", { poemId, savedPoemId });
+
+  const [isSaving, setIsSaving] = useState(false);
+  const isSavingRef = useRef(false);
+
   const [tool, setTool] = useState<"select" | "draw">("select");
   const [drawingColor, setDrawingColor] = useState("#505050");
   const [recentColors, setRecentColors] = useState<string[]>(["#505050"]);
   const [markerSize, setMarkerSize] = useState(8);
   const [cursorPosition, setCursorPosition] = useState<Point | null>(null);
+
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const colorInputRef = useRef<HTMLInputElement>(null);
   const isDrawingRef = useRef(false);
+
   const [strokes, setStrokes] = useState<Stroke[]>(initialDrawing);
   const [drawingWidth, setDrawingWidth] = useState(initialDrawingWidth ?? 0);
   const [drawingHeight, setDrawingHeight] = useState(initialDrawingHeight ?? 0);
@@ -162,6 +180,8 @@ export default function Studio({
         setDrawingWidth(studioState.drawingWidth ?? 0);
         setDrawingHeight(studioState.drawingHeight ?? 0);
 
+        setSavedPoemId(studioState.savedPoemId ?? null);
+
         setUndoStack(
           (studioState.undoStack ?? []).map(
             (snapshot: { blackoutData: number[]; strokes: Stroke[] }) => ({
@@ -219,6 +239,7 @@ export default function Studio({
       const studioState = {
         passage,
         title,
+        savedPoemId,
         blackoutData: Array.from(blackedOut),
         strokes,
         drawingWidth,
@@ -259,6 +280,7 @@ export default function Studio({
     undoStack,
     redoStack,
     poemId,
+    savedPoemId,
   ]);
 
   useEffect(() => {
@@ -404,12 +426,17 @@ export default function Studio({
 
       setPassage(text);
       setTitle("");
+      setSavedPoemId(null);
       setBlackedOut(new Set());
       setStrokes([]);
       setDrawingWidth(0);
       setDrawingHeight(0);
       setUndoStack([]);
       setRedoStack([]);
+
+      // A fresh fragment starts a new, unsaved poem.
+      setSavedPoemId(null);
+      setSaveMessage(null);
     } catch {
       setError("Couldn't load a fragment.");
     } finally {
@@ -521,61 +548,92 @@ export default function Studio({
   }
 
   async function handleSave() {
-    const { data, error } = await supabase.auth.getUser();
-
-    if (error || !data.user) {
-      console.error("You must be signed in to save a poem.");
-      setSaveMessage("Sign in to save your poem.");
+    if (isSavingRef.current) {
       return;
     }
 
-    const user = data.user;
-    const blackoutData = Array.from(blackedOut);
+    isSavingRef.current = true;
+    setIsSaving(true);
 
-    const drawingData: DrawingData = {
-      width: drawingWidth,
-      height: drawingHeight,
-      strokes,
-    };
+    try {
+      const { data, error: authError } = await supabase.auth.getUser();
 
-    let saveError;
+      if (authError || !data.user) {
+        setSaveMessage("Sign in to save your poem.");
+        return;
+      }
 
-    if (poemId) {
-      const { data: updatedPoem, error } = await supabase
-        .from("poems")
-        .update({
-          title: title.trim() || null,
-          blackout_data: blackoutData,
-          drawing_data: drawingData,
-        })
-        .eq("id", poemId)
-        .eq("user_id", user.id)
-        .select("id")
-        .maybeSingle();
+      const user = data.user;
+      const blackoutData = Array.from(blackedOut);
 
-      saveError =
-        error || (!updatedPoem ? new Error("No poem was updated.") : null);
-    } else {
-      const { error } = await supabase.from("poems").insert({
-        user_id: user.id,
-        title: title.trim() || null,
-        source_text: passage,
-        blackout_data: blackoutData,
-        drawing_data: drawingData,
-      });
+      const drawingData: DrawingData = {
+        width: drawingWidth,
+        height: drawingHeight,
+        strokes,
+      };
 
-      saveError = error;
+      if (savedPoemId) {
+        // UPDATE an existing poem.
+        const { data: updatedPoem, error } = await supabase
+          .from("poems")
+          .update({
+            title: title.trim() || null,
+            blackout_data: blackoutData,
+            drawing_data: drawingData,
+          })
+          .eq("id", savedPoemId)
+          .eq("user_id", user.id)
+          .select("id")
+          .maybeSingle();
+
+        if (error || !updatedPoem) {
+          console.error(
+            "Error updating poem:",
+            error ?? new Error("No poem was updated."),
+          );
+
+          setSaveMessage("Couldn't save your changes.");
+          return;
+        }
+
+        console.log("UPDATE SUCCESSFUL:", updatedPoem.id);
+        setSaveMessage("Changes saved.");
+      } else {
+        // INSERT a new poem.
+        const { data: newPoem, error } = await supabase
+          .from("poems")
+          .insert({
+            user_id: user.id,
+            title: title.trim() || null,
+            source_text: passage,
+            blackout_data: blackoutData,
+            drawing_data: drawingData,
+          })
+          .select("id")
+          .single();
+
+        if (error || !newPoem) {
+          console.error(
+            "Error creating poem:",
+            error ?? new Error("No poem was returned."),
+          );
+
+          setSaveMessage("Couldn't save your poem.");
+          return;
+        }
+
+        // Keep this ID so the next save updates the same poem.
+        setSavedPoemId(newPoem.id);
+
+        setSaveMessage("Poem saved.");
+      }
+    } catch (error) {
+      console.error("Unexpected error saving poem:", error);
+      setSaveMessage("Couldn't save your poem.");
+    } finally {
+      isSavingRef.current = false;
+      setIsSaving(false);
     }
-
-    if (saveError) {
-      console.error("Error saving poem:", saveError);
-      setSaveMessage(
-        poemId ? "Couldn't save your changes." : "Couldn't save your poem.",
-      );
-      return;
-    }
-
-    setSaveMessage(poemId ? "Changes saved." : "Poem saved.");
   }
 
   const words = passage.split(/(\s+)/);
@@ -602,7 +660,7 @@ export default function Studio({
       return;
     }
 
-    // Add the color being used to recent colors
+    // Add the color being used to recent colors.
     setRecentColors((colors) =>
       [
         drawingColor,
@@ -894,6 +952,7 @@ export default function Studio({
                     type="button"
                     className={styles.secondaryButton}
                     onClick={handleFreshFragment}
+                    disabled={isSaving}
                   >
                     Fresh Fragment
                   </button>
@@ -903,6 +962,7 @@ export default function Studio({
                   type="button"
                   className={styles.secondaryButton}
                   onClick={handleCleanSlate}
+                  disabled={isSaving}
                 >
                   Clean Slate
                 </button>
@@ -911,8 +971,13 @@ export default function Studio({
                   type="button"
                   className={styles.primaryButton}
                   onClick={handleSave}
+                  disabled={isSaving}
                 >
-                  {poemId ? "Save Changes" : "Save"}
+                  {isSaving
+                    ? "Saving..."
+                    : savedPoemId
+                      ? "Save Changes"
+                      : "Save"}
                 </button>
               </div>
             </div>
