@@ -541,7 +541,7 @@ export default function Studio({
     let saveError;
 
     if (poemId) {
-      const { error } = await supabase
+      const { data: updatedPoem, error } = await supabase
         .from("poems")
         .update({
           title: title.trim() || null,
@@ -549,9 +549,12 @@ export default function Studio({
           drawing_data: drawingData,
         })
         .eq("id", poemId)
-        .eq("user_id", user.id);
+        .eq("user_id", user.id)
+        .select("id")
+        .maybeSingle();
 
-      saveError = error;
+      saveError =
+        error || (!updatedPoem ? new Error("No poem was updated.") : null);
     } else {
       const { error } = await supabase.from("poems").insert({
         user_id: user.id,

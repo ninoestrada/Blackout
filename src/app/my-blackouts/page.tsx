@@ -174,19 +174,30 @@ export default function MyBlackouts() {
     setDeleteError(null);
     setDeleteMessage(null);
 
-    const { error } = await supabase
+    const { data: userData, error: userError } = await supabase.auth.getUser();
+
+    if (userError || !userData.user) {
+      setDeleteError("Please sign in again to delete your blackout.");
+      setPoemToDelete(null);
+      return;
+    }
+
+    const { data: deletedPoem, error } = await supabase
       .from("poems")
       .delete()
-      .eq("id", poemToDelete.id);
+      .eq("id", poemToDelete.id)
+      .eq("user_id", userData.user.id)
+      .select("id")
+      .maybeSingle();
 
-    if (error) {
+    if (error || !deletedPoem) {
       setDeleteError("Couldn't delete your blackout.");
       setPoemToDelete(null);
       return;
     }
 
     setPoems((currentPoems) =>
-      currentPoems.filter((poem) => poem.id !== poemToDelete.id),
+      currentPoems.filter((poem) => poem.id !== deletedPoem.id),
     );
 
     setPoemToDelete(null);
