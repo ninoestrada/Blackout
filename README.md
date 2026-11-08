@@ -17,20 +17,26 @@
 
 **Blackout** is a quiet tool for uncovering meaning inside existing language. You begin with a page of text. You conceal most of it. What remains becomes the poem.
 
+Inspired by an interest in blackout poetry and its approachable, playful nature, the project aims to make poetry feel less intimidating and more accessible. Rather than starting with a blank page, users can discover new meaning in existing words, turning ordinary passages into something personal and expressive.
+
+Blackout was created to bring more of the freedom and creativity of physical blackout poetry into a digital space. Beyond simply concealing words, the application combines blackout and drawing tools, allowing users to experiment with visual expression, personalize their poems, and save or share their creations as images.
+
 ### ✨ Features
 
-- Create poems by blacking out words from existing text.
-- Draw on poems using different colors and brush sizes.
-- Undo and redo blackout and drawing edits.
-- Sign in with Google to save, edit, and manage poems.
-- Export poems as PNG images.
+- **Blackout Poetry Editor:** Create poems by blacking out words from existing text.
+- **Drawing Tools:** Personalize poems with freehand drawings, adjustable colors, and brush sizes.
+- **Undo & Redo:** Revisit and restore changes while editing poems.
+- **Google Sign-In:** Sign in with Google to access saved poems.
+- **Poem Management:** Save, view, edit, and delete poems from a personal collection.
+- **PNG Export:** Download finished poems as images to keep or share.
 
 <!-- DEFINITION -->
 
-## 🖋 What is Blackout Poetry?
+## 🖋 What Is Blackout Poetry?
 
-Blackout poetry is a form of found poetry where you take an existing text and remove most of it,
-leaving selected words visible to form a new meaning or message.
+Blackout poetry is a form of found poetry where you take an existing text and conceal most of it, leaving selected words visible to create a new meaning or message.
+
+Much like sampling in hip-hop or creating street art, blackout poetry transforms something that already exists into something personal and expressive. It also blends literary and visual art, where the arrangement of words, negative space, and illustrations can become part of the poem itself. The result is a playful, approachable form of poetry that invites experimentation without starting from a blank page.
 
 ### **🛠️ Tech Stack**
 
@@ -38,9 +44,11 @@ leaving selected words visible to form a new meaning or message.
 | :---------------------------------------------: | :---------------------------------------: |
 | [![TypeScript][TypeScript.com]][TypeScript-url] | [![Supabase][Supabase.com]][Supabase-url] |
 |        [![React][React.com]][React-url]         | [![Postgres][Postgres.com]][Postgres-url] |
-| [![Next.js][Next.js.com]][Next.js-url]          |                                           |
+|     [![Next.js][Next.js.com]][Next.js-url]      |                                           |
 
 ## 🏗️ Architecture
+
+The diagram below illustrates Blackout's architecture, including its Next.js application, Supabase services, and external text sources.
 
 ![Blackout System Architecture](images/architecture.jpg)
 
@@ -50,12 +58,14 @@ leaving selected words visible to form a new meaning or message.
 
 ### **💾 Installation**
 
-1. Clone the repository and navigate to the project directory
+**Prerequisites:** Node.js 20.9 or later and npm.
+
+1. Clone the repository and navigate to the project directory.
    ```sh
    git clone https://github.com/ninoestrada/Blackout.git
    cd Blackout
    ```
-2. Install dependencies
+2. Install dependencies.
    ```sh
    npm install
    ```
@@ -66,7 +76,7 @@ leaving selected words visible to form a new meaning or message.
    NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=your-supabase-publishable-key
    ```
 5. Set up the database using the SQL files in `supabase/migrations`.
-6. Configure Google sign-in through Supabase Authentication.
+6. Configure Google sign-in through Supabase Authentication, including Google OAuth credentials and the appropriate redirect URLs for `/auth/callback`.
 
 ### **▶️ Running the Program**
 
@@ -76,7 +86,11 @@ npm run dev
 
 Open [http://localhost:3000](http://localhost:3000) in your browser, or use the local URL shown in your terminal.
 
-### **🧪 Tests**
+### 🧪 Testing
+
+Blackout includes automated tests to check that the poetry editor behaves as expected, particularly when making changes to the application.
+
+To run the tests locally:
 
 ```sh
 npm test
