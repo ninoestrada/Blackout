@@ -32,7 +32,7 @@ Blackout was created to bring more of the freedom and creativity of physical bla
 
 <!-- DEFINITION -->
 
-## 🖋 What Is Blackout Poetry?
+## 🖋 What is Blackout Poetry?
 
 Blackout poetry is a form of found poetry where you take an existing text and conceal most of it, leaving selected words visible to create a new meaning or message.
 
