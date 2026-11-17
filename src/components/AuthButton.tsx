@@ -67,13 +67,13 @@ export default function AuthButton() {
       {user ? (
         <button
           type="button"
-          className="landing-button"
+          className="primary-button"
           onClick={handleSignOut}
         >
           Sign out
         </button>
       ) : (
-        <button type="button" className="landing-button" onClick={handleSignIn}>
+        <button type="button" className="primary-button" onClick={handleSignIn}>
           Sign in
         </button>
       )}

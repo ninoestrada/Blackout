@@ -1,5 +1,12 @@
-import Link from "next/link";
+/**
+ * Blackout's homepage.
+ * Displays the landing page with an introduction and a link to the workspace.
+ */
+
 import { Victor_Mono } from "next/font/google";
+import Link from "next/link";
+
+import styles from "./page.module.css";
 
 const victorMono = Victor_Mono({
   subsets: ["latin"],
@@ -7,14 +14,19 @@ const victorMono = Victor_Mono({
   weight: ["400"],
 });
 
+/**
+ * Renders the homepage with an introduction and a link to the workspace.
+ *
+ * @returns The homepage JSX.
+ */
 export default function Home() {
   return (
-    <main className="landing">
-      <section className="landing-content">
+    <main className={styles.landing}>
+      <section className={styles["landing-content"]}>
         <h1>
           Start blackout
           <br />
-          poetry. <u className="here-text">Here.</u>
+          poetry. <u>Here.</u>
         </h1>
 
         <p>
@@ -25,8 +37,8 @@ export default function Home() {
           and reveal what was there all along.
         </p>
 
-        <div className="landing-actions">
-          <Link href="/studio" className="landing-button">
+        <div className={styles["landing-actions"]}>
+          <Link href="/studio" className="primary-button">
             Enter Workspace
           </Link>
 
