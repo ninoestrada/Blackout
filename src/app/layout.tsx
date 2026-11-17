@@ -1,13 +1,12 @@
 /**
  * Blackout's root layout.
- * Defines the layout shared across all pages, including the header, homepage link, and authentication button.
+ * Defines the layout shared across all pages.
  */
 
 import type { Metadata } from "next";
 import { Space_Mono } from "next/font/google";
-import Link from "next/link";
 
-import AuthButton from "@/components/AuthButton";
+import Navbar from "@/components/Navbar";
 
 import "./globals.css";
 
@@ -35,14 +34,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={spaceMono.className}>
-        <header className="site-header">
-          <Link href="/" className="site-title">
-            <span className="marked-word">black</span>out
-          </Link>
-
-          <AuthButton />
-        </header>
-
+        <Navbar />
         {children}
       </body>
     </html>

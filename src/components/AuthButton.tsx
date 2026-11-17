@@ -1,29 +1,25 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import type { User } from "@supabase/supabase-js";
-import Link from "next/link";
+/**
+ * Blackout's authentication button.
+ * Handles Google sign-in and sign-out.
+ */
+
 import { supabase } from "@/lib/supabase";
 
-export default function AuthButton() {
-  const [user, setUser] = useState<User | null>(null);
+type AuthButtonProps = {
+  isSignedIn: boolean;
+};
 
-  useEffect(() => {
-    supabase.auth.getUser().then(({ data }) => {
-      setUser(data.user);
-    });
-
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
-      setUser(session?.user ?? null);
-    });
-
-    return () => {
-      subscription.unsubscribe();
-    };
-  }, []);
-
+/**
+ * Renders a sign-in or sign-out button based on the user's authentication state.
+ *
+ * @returns The authentication button JSX.
+ */
+export default function AuthButton({ isSignedIn }: AuthButtonProps) {
+  /**
+   * Starts Google sign-in and remembers which page to return to after signing in.
+   */
   async function handleSignIn() {
     const returnPath = window.location.pathname + window.location.search;
 
@@ -44,6 +40,9 @@ export default function AuthButton() {
     }
   }
 
+  /**
+   * Signs out the current user.
+   */
   async function handleSignOut() {
     const { error } = await supabase.auth.signOut();
 
@@ -52,31 +51,13 @@ export default function AuthButton() {
     }
   }
 
-  return (
-    <nav className="account-nav" aria-label="Main navigation">
-      <Link href="/studio" className="nav-link">
-        Studio
-      </Link>
-
-      {user && (
-        <Link href="/my-blackouts" className="nav-link">
-          My Blackouts
-        </Link>
-      )}
-
-      {user ? (
-        <button
-          type="button"
-          className="primary-button"
-          onClick={handleSignOut}
-        >
-          Sign out
-        </button>
-      ) : (
-        <button type="button" className="primary-button" onClick={handleSignIn}>
-          Sign in
-        </button>
-      )}
-    </nav>
+  return isSignedIn ? (
+    <button type="button" className="primary-button" onClick={handleSignOut}>
+      Sign out
+    </button>
+  ) : (
+    <button type="button" className="primary-button" onClick={handleSignIn}>
+      Sign in
+    </button>
   );
 }
