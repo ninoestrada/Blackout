@@ -1,19 +1,33 @@
 /**
- * Creates or updates a blackout poem in Supabase.
+ * Manages Blackout's poem saving.
+ * Saves new poems or updates previously saved poems.
  */
 
 import { supabase } from "@/lib/supabase";
+
 import type { DrawingData } from "../types";
 
 type SavePoemOptions = {
+  /** The ID of the user saving the poem. */
   userId: string;
+  /** The ID of an existing poem, or null for a new poem. */
   poemId: string | null;
+  /** The poem's title. */
   title: string;
+  /** The original text used to create the poem. */
   passage: string;
+  /** The positions of the blacked-out words. */
   blackedOut: Set<number>;
+  /** The poem's drawing data. */
   drawingData: DrawingData;
 };
 
+/**
+ * Saves a poem for the first time or updates a previously saved poem.
+ *
+ * @returns The ID of the saved poem.
+ * @throws If the poem cannot be saved.
+ */
 export default async function savePoem({
   userId,
   poemId,
@@ -25,7 +39,6 @@ export default async function savePoem({
   const blackoutData = Array.from(blackedOut);
 
   if (poemId) {
-    // Update an existing poem.
     const { data, error } = await supabase
       .from("poems")
       .update({
@@ -45,7 +58,6 @@ export default async function savePoem({
     return data.id;
   }
 
-  // Create a new poem.
   const { data, error } = await supabase
     .from("poems")
     .insert({

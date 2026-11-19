@@ -1,5 +1,6 @@
 /**
- * Fetches passage text from Blackout's passage API.
+ * Manages Blackout's passage requests.
+ * Fetches a random passage from the passage API.
  */
 
 /**

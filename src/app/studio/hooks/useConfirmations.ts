@@ -1,5 +1,5 @@
 /**
- * Manages Blackout's Studio confirmation dialogs.
+ * Manages Blackout's Studio confirmation modal.
  * Handles starting a new poem and clearing the current poem's edits.
  */
 

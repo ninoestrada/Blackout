@@ -1,15 +1,22 @@
 /**
- * Exports a blackout poem as a PNG image.
+ * Manages Blackout's poem exports.
+ * Prepares the poem as a PNG image and downloads it.
  */
 
 import html2canvas from "html2canvas";
+
 import styles from "../page.module.css";
 
 type ExportPoemOptions = {
+  /** The HTML element containing the poem to export. */
   poemElement: HTMLDivElement;
+  /** The poem's title, displayed in the image and used as the filename. */
   title: string;
 };
 
+/**
+ * Prepares the poem as a PNG image and downloads it.
+ */
 export default async function exportPoem({
   poemElement,
   title,
@@ -28,12 +35,13 @@ export default async function exportPoem({
       const clonedPoem = clonedDocument.querySelector("[data-poem-export]");
       const titleInput = clonedPoem?.querySelector("input");
 
+      // Adjust the poem's layout for export.
       if (clonedPoem) {
-        const poemBounds = poemElement.getBoundingClientRect();
+        const poemRect = poemElement.getBoundingClientRect();
 
         clonedPoem.setAttribute(
           "style",
-          `box-sizing: content-box; width: ${poemBounds.width}px; padding: 64px 64px 80px;`,
+          `box-sizing: content-box; width: ${poemRect.width}px; padding: 64px 64px 80px;`,
         );
       }
 
@@ -50,7 +58,8 @@ export default async function exportPoem({
     },
   });
 
-  const filename =
+  // Replace invalid characters in the filename.
+  const fileName =
     title
       .trim()
       .replace(/[<>:"/\\|?*\u0000-\u001f]/g, "-")
@@ -58,7 +67,7 @@ export default async function exportPoem({
 
   const downloadLink = document.createElement("a");
 
-  downloadLink.download = `${filename}.png`;
+  downloadLink.download = `${fileName}.png`;
   downloadLink.href = canvas.toDataURL("image/png");
 
   document.body.appendChild(downloadLink);
