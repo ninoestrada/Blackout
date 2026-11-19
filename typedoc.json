@@ -1,0 +1,15 @@
+/**
+ * Sets up TypeDoc for Blackout's Studio.
+ * Specifies which files to document, where to save them, and what to include.
+ */
+
+{
+  "$schema": "https://typedoc.org/schema.json",
+  "entryPoints": ["src/app/studio"],
+  "entryPointStrategy": "expand",
+  "out": "docs",
+  "exclude": ["**/__tests__/**", "**/*.test.ts", "**/*.test.tsx"],
+  "excludeInternal": false,
+  "excludePrivate": false,
+  "excludeProtected": false
+}
