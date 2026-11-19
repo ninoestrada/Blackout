@@ -2,7 +2,8 @@
 
 import { use, useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
-import Studio, { type DrawingData, type Stroke } from "../Studio";
+import Studio from "../Studio";
+import type { DrawingData, Stroke } from "../types";
 
 type SavedPoem = {
   id: string;

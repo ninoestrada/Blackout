@@ -6,8 +6,8 @@ import Link from "next/link";
 import { Ellipsis, Pencil, Trash2, SquarePen } from "lucide-react";
 import { useRouter } from "next/navigation";
 import styles from "./page.module.css";
-import ConfirmationModal from "../studio/ConfirmationModal";
-import { type DrawingData, type Stroke } from "../studio/Studio";
+import ConfirmationModal from "../studio/components/ConfirmationModal";
+import type { DrawingData, Stroke } from "../studio/types";
 import { Space_Mono } from "next/font/google";
 import DrawingPreview from "./DrawingPreview";
 

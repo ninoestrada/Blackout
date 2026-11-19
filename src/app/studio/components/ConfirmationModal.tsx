@@ -13,7 +13,7 @@ import {
   type RefObject,
 } from "react";
 
-import styles from "./page.module.css";
+import styles from "../page.module.css";
 
 type ConfirmationModalProps = {
   title: string;

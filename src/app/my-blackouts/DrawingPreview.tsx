@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import { type Stroke } from "../studio/Studio";
+import type { Stroke } from "../studio/types";
 import styles from "./page.module.css";
 
 type DrawingPreviewProps = {
