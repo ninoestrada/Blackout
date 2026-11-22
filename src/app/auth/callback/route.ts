@@ -1,26 +1,40 @@
+/**
+ * Blackout's authentication callback.
+ * Completes sign-in and redirects users to the appropriate page.
+ */
+
 import { NextResponse } from "next/server";
+
 import { createSupabaseServerClient } from "@/lib/supabaseServer";
 
+/**
+ * Handles the return from Google sign-in by exchanging the authorization
+ * code for a Supabase session and redirecting the user back to Blackout.
+ *
+ * @param request - The callback request containing the authorization code.
+ * @returns A redirect to the appropriate page based on the sign-in result.
+ */
 export async function GET(request: Request) {
   const requestUrl = new URL(request.url);
 
-  const code = requestUrl.searchParams.get("code");
-  const nextParam = requestUrl.searchParams.get("next");
+  const authCode = requestUrl.searchParams.get("code");
+  const redirectPath = requestUrl.searchParams.get("next");
 
   let redirectUrl = new URL("/", requestUrl.origin);
 
-  if (nextParam) {
-    const candidateUrl = new URL(nextParam, requestUrl.origin);
+  // Only allow redirects within the application.
+  if (redirectPath) {
+    const requestedUrl = new URL(redirectPath, requestUrl.origin);
 
-    if (candidateUrl.origin === requestUrl.origin) {
-      redirectUrl = candidateUrl;
+    if (requestedUrl.origin === requestUrl.origin) {
+      redirectUrl = requestedUrl;
     }
   }
 
-  if (code) {
+  if (authCode) {
     const supabase = await createSupabaseServerClient();
 
-    const { error } = await supabase.auth.exchangeCodeForSession(code);
+    const { error } = await supabase.auth.exchangeCodeForSession(authCode);
 
     if (!error) {
       redirectUrl.searchParams.set("authReturn", "true");

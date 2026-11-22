@@ -1,42 +1,42 @@
+/**
+ * Blackout's passage API.
+ * Fetches a random passage from a Project Gutenberg book for use in the Studio.
+ */
+
+type GutenbergBook = {
+  /** File formats and download URLs for the book. */
+  formats: Record<string, string>;
+};
+
+/**
+ * Selects a random English-language book from Gutendex and extracts
+ * a 200-word passage from its text.
+ *
+ * @returns A response containing the passage.
+ */
 export async function GET() {
-  // Get a List of Books from Gutendex
-  const response = await fetch("https://gutendex.com/books/?languages=en");
+  const passageLength = 200;
+  const textFormat = "text/plain; charset=utf-8";
 
-  const data = await response.json();
+  const booksResponse = await fetch("https://gutendex.com/books/?languages=en");
+  const booksData = await booksResponse.json();
 
-  type GutenbergBook = {
-    formats: Record<string, string>;
-  };
-
-  // Keep Books with Plain-Text 
-  const booksWithText = data.results.filter(
-    (book: GutenbergBook) => book.formats["text/plain; charset=utf-8"],
+  const booksWithText = booksData.results.filter(
+    (book: GutenbergBook) => book.formats[textFormat],
   );
 
-  // Pick Random Book
-  const randomIndex = Math.floor(Math.random() * booksWithText.length);
-  const book = booksWithText[randomIndex];
+  const randomBookIndex = Math.floor(Math.random() * booksWithText.length);
+  const selectedBook = booksWithText[randomBookIndex];
+  const bookTextUrl = selectedBook.formats[textFormat];
 
-  // Get Book's URL
-  const textUrl = book.formats["text/plain; charset=utf-8"];
-
-  // Fetch Book
-  const textResponse = await fetch(textUrl);
-  const bookText = await textResponse.text();
-
-  // Split Book into Words
+  const bookResponse = await fetch(bookTextUrl);
+  const bookText = await bookResponse.text();
   const words = bookText.split(/\s+/);
 
-  // Pick Random Starting Point
-  const passageLength = 200;
-  const maxStart = words.length - passageLength;
-  const randomStart = Math.floor(Math.random() * maxStart);
+  const maxStartIndex = words.length - passageLength;
+  const startIndex = Math.floor(Math.random() * maxStartIndex);
 
-  // Grab 200 Words
-  const passage = words
-    .slice(randomStart, randomStart + passageLength)
-    .join(" ");
+  const passage = words.slice(startIndex, startIndex + passageLength).join(" ");
 
-  // Return the Passage
   return new Response(passage);
 }

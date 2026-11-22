@@ -1,0 +1,35 @@
+/**
+ * Sets up TypeDoc for Blackout.
+ * Specifies which files to document, where to save them, and what to exclude.
+ */
+
+{
+  "$schema": "https://typedoc.org/schema.json",
+  "entryPoints": ["src"],
+  "entryPointStrategy": "expand",
+  "out": "docs",
+  "exclude": ["**/__tests__/**", "**/*.test.ts", "**/*.test.tsx"],
+  "intentionallyNotExported": [
+    "AuthButtonProps",
+    "ConfirmationModalProps",
+    "DrawingPreviewProps",
+    "ExportPoemOptions",
+    "PoemCardProps",
+    "PoemWorkspaceProps",
+    "RenamePoemModalProps",
+    "SavePoemOptions",
+    "StudioActionsProps",
+    "StudioMessagesProps",
+    "StudioProps",
+    "StudioSidebarProps",
+    "UseConfirmationsOptions",
+    "UseDrawingProps",
+    "UseExportPoemProps",
+    "UseFragmentOptions",
+    "UseKeyboardShortcutsProps",
+    "UseSavePoemProps",
+    "UseSignInRecoveryProps",
+    "UseUndoRedoProps"
+  ],
+  "ignoredHighlightLanguages": ["env"]
+}

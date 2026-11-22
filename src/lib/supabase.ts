@@ -1,3 +1,8 @@
+/**
+ * Blackout's Supabase browser client.
+ * Handles authentication and database access from the browser.
+ */
+
 import { createBrowserClient } from "@supabase/ssr";
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;

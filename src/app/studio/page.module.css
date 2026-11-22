@@ -1,11 +1,16 @@
+/**
+ * Styles for the Studio page.
+ * Includes the editor layout, tools, passage, drawing canvas, and confirmation modal.
+ */
+
+/* ---------------------------------------- Studio Layout ---------------------------------------- */
+
 .content {
   width: 100%;
   max-width: 1120px;
   margin: 0 auto;
   padding: 80px 32px 160px;
 }
-
-/* ---------- Studio layout ---------- */
 
 .studioLayout {
   display: grid;
@@ -23,13 +28,12 @@
   background-color: var(--color-background);
 }
 
-/* ---------- Tool panel ---------- */
+/* ---------------------------------------- Editor Tools ---------------------------------------- */
 
 .toolPanel {
   display: flex;
   flex-direction: column;
   gap: 28px;
-
   padding: 0;
 }
 
@@ -55,14 +59,11 @@
 
 .toolButton {
   padding: 9px 10px;
-
   border: 1px solid var(--color-border);
   background-color: transparent;
   color: var(--color-text);
-
   font: inherit;
   font-size: 12px;
-
   cursor: pointer;
 }
 
@@ -89,7 +90,7 @@
   background-color: var(--color-text);
 }
 
-/* ---------- Drawing controls ---------- */
+/* ---------------------------------------- Drawing Controls ---------------------------------------- */
 
 .colorControl {
   display: flex;
@@ -100,12 +101,9 @@
 .colorInput {
   width: 100%;
   height: 32px;
-
   padding: 2px;
-
   border: 1px solid var(--color-border);
   background-color: transparent;
-
   cursor: pointer;
 }
 
@@ -117,15 +115,12 @@
 }
 
 .colorSwatch {
+  flex: 0 0 20px;
   width: 20px;
   height: 20px;
-  flex: 0 0 20px;
-
   padding: 0;
-
   border: 1px solid var(--color-border);
   border-radius: 50%;
-
   cursor: pointer;
 }
 
@@ -144,392 +139,21 @@
   display: flex;
   align-items: center;
   gap: 8px;
-
   font-size: 12px;
 }
 
 .markerSizeInput {
   width: 64px;
   padding: 7px 8px;
-
   border: 1px solid var(--color-border);
   background-color: var(--color-background);
   color: var(--color-text);
-
   font: inherit;
   font-size: 12px;
   text-align: center;
 }
 
-/* ---------- Passage ---------- */
-
-.passageContainer {
-  position: relative;
-}
-
-.passage {
-  margin: 0;
-
-  font-size: 16px;
-  line-height: 1.8;
-  text-align: left;
-}
-
-.passage span {
-  cursor: pointer;
-}
-
-.blackedOut {
-  background-color: var(--color-text);
-  color: var(--color-text);
-}
-
-/* ---------- Drawing canvas ---------- */
-
-.drawingCanvas {
-  position: absolute;
-  inset: 0;
-
-  width: 100%;
-  height: 100%;
-
-  pointer-events: none;
-}
-
-.drawingCanvasActive {
-  pointer-events: auto;
-  cursor: none;
-}
-
-.markerCursor {
-  position: absolute;
-  z-index: 2;
-
-  pointer-events: none;
-
-  transform: translate(-4px, -20px);
-}
-
-/* ---------- Document actions ---------- */
-
-.fragmentActions {
-  display: flex;
-  justify-content: flex-end;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 12px;
-
-  margin-top: 48px;
-}
-
-.primaryButton,
-.secondaryButton,
-.fragmentButton {
-  padding: 11px 18px;
-
-  border: 1px solid var(--color-border);
-
-  font: inherit;
-  font-size: 13px;
-
-  cursor: pointer;
-}
-
-.primaryButton,
-.fragmentButton {
-  background-color: var(--color-text);
-  color: var(--color-background);
-}
-
-.secondaryButton {
-  background-color: transparent;
-  color: var(--color-text);
-}
-
-.primaryButton:hover,
-.fragmentButton:hover {
-  opacity: 0.85;
-}
-
-.secondaryButton:hover {
-  background-color: var(--color-surface);
-}
-
-.primaryButton:focus-visible,
-.secondaryButton:focus-visible,
-.fragmentButton:focus-visible {
-  outline: 2px solid var(--color-text);
-  outline-offset: 3px;
-}
-
-.toast {
-  position: fixed;
-  right: 24px;
-  bottom: 24px;
-  z-index: 1000;
-
-  padding: 12px 16px;
-
-  background-color: var(--color-text);
-  color: var(--color-background);
-
-  font-size: 14px;
-}
-
-/* ---------- Loading / error ---------- */
-
-.statusMessage {
-  max-width: 800px;
-  min-height: 250px;
-  margin: 0 auto;
-
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.errorContent {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 16px;
-}
-
-.errorContent p {
-  margin: 0;
-}
-
-.retryButton {
-  margin: 0;
-}
-
-/* ---------- Confirmation modal ---------- */
-
-.modalOverlay {
-  position: fixed;
-  inset: 0;
-  z-index: 1000;
-
-  display: flex;
-  align-items: center;
-  justify-content: center;
-
-  padding: 24px;
-
-  background-color: rgba(0, 0, 0, 0.4);
-}
-
-.modal {
-  position: relative;
-
-  width: 100%;
-  max-width: 400px;
-
-  padding: 28px 32px;
-
-  border: 1px solid var(--color-border);
-  background-color: var(--color-background);
-  color: var(--color-text);
-}
-
-.modal h2 {
-  margin: 0 32px 16px 0;
-
-  font-size: 20px;
-  font-weight: 700;
-}
-
-.modal p {
-  margin: 0;
-
-  font-size: 14px;
-  font-weight: 400;
-  line-height: 1.6;
-}
-
-.checkboxLabel {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-
-  margin-top: 20px;
-
-  font-size: 12px;
-  font-weight: 400;
-
-  cursor: pointer;
-}
-
-.checkboxLabel input {
-  accent-color: var(--color-text);
-}
-
-.modalActions {
-  display: flex;
-  justify-content: flex-end;
-  gap: 12px;
-
-  margin-top: 28px;
-}
-
-.modalButton {
-  padding: 10px 16px;
-
-  border: 1px solid var(--color-border);
-  background-color: var(--color-text);
-  color: var(--color-background);
-
-  font: inherit;
-
-  cursor: pointer;
-}
-
-.modalButton:hover {
-  opacity: 0.85;
-}
-
-.modalButton:focus-visible,
-.closeButton:focus-visible {
-  outline: 2px solid var(--color-text);
-  outline-offset: 2px;
-}
-
-.closeButton {
-  position: absolute;
-  top: 12px;
-  right: 16px;
-
-  border: none;
-  background: transparent;
-  color: var(--color-text);
-
-  font: inherit;
-  font-size: 20px;
-
-  cursor: pointer;
-}
-
-/* ---------- Mobile ---------- */
-
-@media (max-width: 768px) {
-  .content {
-    padding: 48px 20px 100px;
-  }
-
-  .studioLayout {
-    grid-template-columns: 1fr;
-    gap: 32px;
-  }
-
-  .toolPanel {
-    flex-direction: row;
-    align-items: flex-start;
-    flex-wrap: wrap;
-    gap: 20px;
-
-    padding: 16px;
-  }
-
-  .toolSection {
-    min-width: 120px;
-  }
-
-  .colorControl {
-    flex-direction: row;
-    align-items: center;
-  }
-
-  .colorInput {
-    width: 40px;
-    height: 32px;
-  }
-
-  .recentColors {
-    width: auto;
-  }
-
-  .fragmentActions {
-    justify-content: stretch;
-    margin-top: 36px;
-  }
-
-  .primaryButton,
-  .secondaryButton {
-    flex: 1 1 auto;
-  }
-}
-
-@media (max-width: 480px) {
-  .content {
-    padding: 32px 16px 80px;
-  }
-
-  .toolPanel {
-    gap: 16px;
-  }
-
-  .toolSection {
-    min-width: 0;
-    flex: 1 1 130px;
-  }
-
-  .passage {
-    font-size: 15px;
-    line-height: 1.75;
-  }
-
-  .fragmentActions {
-    flex-direction: column;
-    align-items: stretch;
-  }
-
-  .primaryButton,
-  .secondaryButton {
-    width: 100%;
-  }
-
-  /* ---------- Mobile confirmation modal ---------- */
-
-  .modalOverlay {
-    padding: 16px;
-  }
-
-  .modal {
-    width: 100%;
-    min-width: 0;
-    padding: 20px;
-    max-height: calc(100dvh - 32px);
-    overflow-y: auto;
-  }
-
-  .modal h2 {
-    margin-right: 24px;
-    font-size: 18px;
-    line-height: 1.4;
-    overflow-wrap: break-word;
-  }
-
-  .modal p {
-    font-size: 13px;
-  }
-
-  .modalActions {
-    gap: 8px;
-    margin-top: 24px;
-  }
-
-  .modalButton {
-    flex: 1;
-    min-width: 0;
-    padding: 10px 8px;
-    font-size: 12px;
-  }
-
-  .closeButton {
-    top: 12px;
-    right: 12px;
-  }
-}
+/* ---------------------------------------- Poem Title ---------------------------------------- */
 
 .poemTitleContainer {
   width: 100%;
@@ -563,16 +187,353 @@
 .poemExportTitle {
   margin: 0;
   padding: 8px 0;
-
   color: var(--color-text);
   font: inherit;
   font-size: 24px;
   font-weight: 700;
 }
 
+/* ---------------------------------------- Passage ---------------------------------------- */
+
+.passageContainer {
+  position: relative;
+}
+
+.passage {
+  margin: 0;
+  font-size: 16px;
+  line-height: 1.8;
+  text-align: left;
+}
+
+.passage span {
+  cursor: pointer;
+}
+
+.blackedOut {
+  background-color: var(--color-text);
+  color: var(--color-text);
+}
+
+/* ---------------------------------------- Drawing Canvas ---------------------------------------- */
+
+.drawingCanvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+.drawingCanvasActive {
+  pointer-events: auto;
+  cursor: none;
+}
+
+.markerCursor {
+  position: absolute;
+  z-index: 2;
+  pointer-events: none;
+  transform: translate(-4px, -20px);
+}
+
+/* ---------------------------------------- Studio Actions ---------------------------------------- */
+
+.studioActions {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 48px;
+}
+
+.primaryButton,
+.secondaryButton,
+.fragmentButton {
+  padding: 11px 18px;
+  border: 1px solid var(--color-border);
+  font: inherit;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.primaryButton,
+.fragmentButton {
+  background-color: var(--color-text);
+  color: var(--color-background);
+}
+
+.secondaryButton {
+  background-color: transparent;
+  color: var(--color-text);
+}
+
+.primaryButton:hover,
+.fragmentButton:hover {
+  opacity: 0.85;
+}
+
+.secondaryButton:hover {
+  background-color: var(--color-surface);
+}
+
+.primaryButton:focus-visible,
+.secondaryButton:focus-visible,
+.fragmentButton:focus-visible {
+  outline: 2px solid var(--color-text);
+  outline-offset: 3px;
+}
+
+/* ---------------------------------------- Status Messages ---------------------------------------- */
+
+.statusMessage {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  max-width: 800px;
+  min-height: 250px;
+  margin: 0 auto;
+}
+
+.errorContent {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+}
+
+.errorContent p {
+  margin: 0;
+}
+
+.retryButton {
+  margin: 0;
+}
+
+.toast {
+  position: fixed;
+  right: 24px;
+  bottom: 24px;
+  z-index: 1000;
+  padding: 12px 16px;
+  background-color: var(--color-text);
+  color: var(--color-background);
+  font-size: 14px;
+}
+
+/* ---------------------------------------- Confirmation Modal ---------------------------------------- */
+
+.modalOverlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background-color: rgba(0, 0, 0, 0.4);
+}
+
+.modal {
+  position: relative;
+  width: 100%;
+  max-width: 400px;
+  padding: 28px 32px;
+  border: 1px solid var(--color-border);
+  background-color: var(--color-background);
+  color: var(--color-text);
+}
+
+.closeButton {
+  position: absolute;
+  top: 12px;
+  right: 16px;
+  border: none;
+  background: transparent;
+  color: var(--color-text);
+  font: inherit;
+  font-size: 20px;
+  cursor: pointer;
+}
+
+.modal h2 {
+  margin: 0 32px 16px 0;
+  font-size: 20px;
+  font-weight: 700;
+}
+
+.modal p {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 1.6;
+}
+
+.checkboxLabel {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 20px;
+  font-size: 12px;
+  font-weight: 400;
+  cursor: pointer;
+}
+
+.checkboxLabel input {
+  accent-color: var(--color-text);
+}
+
+.modalActions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 28px;
+}
+
+.modalButton {
+  padding: 10px 16px;
+  border: 1px solid var(--color-border);
+  background-color: var(--color-text);
+  color: var(--color-background);
+  font: inherit;
+  cursor: pointer;
+}
+
+.modalButton:hover {
+  opacity: 0.85;
+}
+
+.modalButton:focus-visible,
+.closeButton:focus-visible {
+  outline: 2px solid var(--color-text);
+  outline-offset: 2px;
+}
+
+/* ---------------------------------------- Responsive Styles ---------------------------------------- */
+
+@media (max-width: 768px) {
+  .content {
+    padding: 48px 20px 100px;
+  }
+
+  .studioLayout {
+    grid-template-columns: 1fr;
+    gap: 32px;
+  }
+
+  .toolPanel {
+    flex-direction: row;
+    align-items: flex-start;
+    flex-wrap: wrap;
+    gap: 20px;
+    padding: 16px;
+  }
+
+  .toolSection {
+    min-width: 120px;
+  }
+
+  .colorControl {
+    flex-direction: row;
+    align-items: center;
+  }
+
+  .colorInput {
+    width: 40px;
+    height: 32px;
+  }
+
+  .recentColors {
+    width: auto;
+  }
+
+  .studioActions {
+    justify-content: stretch;
+    margin-top: 36px;
+  }
+
+  .primaryButton,
+  .secondaryButton {
+    flex: 1 1 auto;
+  }
+}
+
 @media (max-width: 600px) {
   .poemTitleInput,
   .poemExportTitle {
     font-size: 20px;
+  }
+}
+
+@media (max-width: 480px) {
+  .content {
+    padding: 32px 16px 80px;
+  }
+
+  .toolPanel {
+    gap: 16px;
+  }
+
+  .toolSection {
+    min-width: 0;
+    flex: 1 1 130px;
+  }
+
+  .passage {
+    font-size: 15px;
+    line-height: 1.75;
+  }
+
+  .studioActions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .primaryButton,
+  .secondaryButton {
+    width: 100%;
+  }
+
+  /* --------------- Mobile confirmation modal --------------- */
+
+  .modalOverlay {
+    padding: 16px;
+  }
+
+  .modal {
+    width: 100%;
+    min-width: 0;
+    max-height: calc(100dvh - 32px);
+    padding: 20px;
+    overflow-y: auto;
+  }
+
+  .modal h2 {
+    margin-right: 24px;
+    font-size: 18px;
+    line-height: 1.4;
+    overflow-wrap: break-word;
+  }
+
+  .modal p {
+    font-size: 13px;
+  }
+
+  .modalActions {
+    gap: 8px;
+    margin-top: 24px;
+  }
+
+  .modalButton {
+    flex: 1;
+    min-width: 0;
+    padding: 10px 8px;
+    font-size: 12px;
+  }
+
+  .closeButton {
+    top: 12px;
+    right: 12px;
   }
 }

@@ -1,14 +1,28 @@
+/**
+ * Blackout's drawing preview for saved poems.
+ * Displays and scales drawings from saved blackout poems.
+ */
+
 "use client";
 
 import { useEffect, useRef } from "react";
-import { type Stroke } from "../studio/Studio";
-import styles from "./page.module.css";
+
+import type { Stroke } from "../../studio/types";
+
+import styles from "../page.module.css";
 
 type DrawingPreviewProps = {
+  /** Strokes that make up the saved drawing. */
   strokes: Stroke[];
+  /** Width of the original canvas. */
   sourceWidth?: number;
 };
 
+/**
+ * Renders the saved poem's drawings and scales them to fit the preview.
+ *
+ * @returns The drawing preview canvas.
+ */
 export default function DrawingPreview({
   strokes,
   sourceWidth,
@@ -22,14 +36,14 @@ export default function DrawingPreview({
       return;
     }
 
-    const preview = canvas.parentElement;
+    const previewContainer = canvas.parentElement;
 
-    if (!preview) {
+    if (!previewContainer) {
       return;
     }
 
-    const width = preview.clientWidth;
-    const height = preview.clientHeight;
+    const width = previewContainer.clientWidth;
+    const height = previewContainer.clientHeight;
 
     canvas.width = width;
     canvas.height = height;
@@ -43,10 +57,10 @@ export default function DrawingPreview({
     context.clearRect(0, 0, width, height);
 
     const originalWidth = sourceWidth ?? 800;
-    const scale = width / originalWidth;
+    const scaleFactor = width / originalWidth;
 
     context.save();
-    context.scale(scale, scale);
+    context.scale(scaleFactor, scaleFactor);
 
     for (const stroke of strokes) {
       if (stroke.points.length === 0) {

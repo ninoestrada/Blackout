@@ -1,3 +1,8 @@
+/**
+ * Blackout's confirmation modal.
+ * Asks users to confirm actions, such as deleting or renaming a poem.
+ */
+
 "use client";
 
 import {
@@ -7,40 +12,52 @@ import {
   type ReactNode,
   type RefObject,
 } from "react";
-import { Space_Mono } from "next/font/google";
-import styles from "./page.module.css";
 
-const spaceMono = Space_Mono({
-  subsets: ["latin"],
-  weight: ["400", "700"],
-});
+import styles from "../page.module.css";
 
 type ConfirmationModalProps = {
+  /** The modal's title. */
   title: string;
+  /** Explains what the user is being asked to confirm. */
   message: string;
-  dontShowAgain?: boolean;
-  onDontShowAgainChange?: (checked: boolean) => void;
-  confirmLabel?: string;
-  onCancel: () => void;
-  onConfirm: () => void;
+  /** Optional content shown below the message. */
   children?: ReactNode;
-  initialFocusRef?: RefObject<HTMLInputElement | null>;
+  /** The text on the confirmation button. */
+  confirmLabel?: string;
+  /** Whether to disable the confirmation button. */
   confirmDisabled?: boolean;
+  /** Whether the action is still in progress. */
   isProcessing?: boolean;
+  /** Whether the user has checked "Don't show this again". */
+  dontShowAgain?: boolean;
+  /** Called when the user changes the checkbox selection. */
+  onDontShowAgainChange?: (checked: boolean) => void;
+  /** Reference to the input field to focus when the modal opens. */
+  initialFocusRef?: RefObject<HTMLInputElement | null>;
+  /** Called when the user cancels the action. */
+  onCancel: () => void;
+  /** Called when the user confirms the action. */
+  onConfirm: () => void;
 };
 
+/**
+ * Displays a confirmation modal with options to confirm or cancel an action.
+ * Allows users to navigate the modal with their keyboard and keeps the focus inside it until it closes.
+ *
+ * @returns The confirmation modal.
+ */
 export default function ConfirmationModal({
   title,
   message,
-  dontShowAgain,
-  onDontShowAgainChange,
-  confirmLabel = "Continue",
-  onCancel,
-  onConfirm,
   children,
-  initialFocusRef,
+  confirmLabel = "Continue",
   confirmDisabled = false,
   isProcessing = false,
+  dontShowAgain,
+  onDontShowAgainChange,
+  initialFocusRef,
+  onCancel,
+  onConfirm,
 }: ConfirmationModalProps) {
   const titleId = useId();
   const descriptionId = useId();
@@ -48,26 +65,33 @@ export default function ConfirmationModal({
   const dialogRef = useRef<HTMLDivElement>(null);
   const cancelButtonRef = useRef<HTMLButtonElement>(null);
   const onCancelRef = useRef(onCancel);
-  const initialFocusRefRef = useRef(initialFocusRef);
+  const latestInitialFocusRef = useRef(initialFocusRef);
   const isProcessingRef = useRef(isProcessing);
 
+  // Keep the values used by the keyboard handler up to date.
   useEffect(() => {
     onCancelRef.current = onCancel;
-    initialFocusRefRef.current = initialFocusRef;
+    latestInitialFocusRef.current = initialFocusRef;
     isProcessingRef.current = isProcessing;
   }, [onCancel, initialFocusRef, isProcessing]);
 
   useEffect(() => {
     const previouslyFocusedElement = document.activeElement;
 
-    // Focus the input for Rename, otherwise focus Cancel.
-    if (initialFocusRefRef.current?.current) {
-      initialFocusRefRef.current.current.focus();
-      initialFocusRefRef.current.current.select();
+    // Focus Cancel by default to prevent accidental confirmation.
+    if (latestInitialFocusRef.current?.current) {
+      latestInitialFocusRef.current.current.focus();
+      latestInitialFocusRef.current.current.select();
     } else {
       cancelButtonRef.current?.focus();
     }
 
+    /**
+     * Handles keyboard input while the modal is open.
+     * Lets users close the modal with Escape and move between its controls using Tab.
+     *
+     * @param event - The keyboard event.
+     */
     function handleKeyDown(event: KeyboardEvent) {
       if (event.key === "Escape") {
         event.preventDefault();
@@ -137,7 +161,7 @@ export default function ConfirmationModal({
     <div className={styles.modalOverlay}>
       <div
         ref={dialogRef}
-        className={`${styles.modal} ${spaceMono.className}`}
+        className={styles.modal}
         role="dialog"
         aria-modal="true"
         aria-labelledby={titleId}
@@ -175,7 +199,7 @@ export default function ConfirmationModal({
           <button
             ref={cancelButtonRef}
             type="button"
-            className={`${styles.modalButton} ${spaceMono.className}`}
+            className={styles.modalButton}
             onClick={onCancel}
             disabled={isProcessing}
           >
@@ -184,7 +208,7 @@ export default function ConfirmationModal({
 
           <button
             type="button"
-            className={`${styles.modalButton} ${spaceMono.className}`}
+            className={styles.modalButton}
             onClick={onConfirm}
             disabled={confirmDisabled || isProcessing}
           >

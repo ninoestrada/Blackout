@@ -1,0 +1,43 @@
+/**
+ * Styles for the homepage.
+ * Includes the homepage layout, typography, and spacing.
+ */
+
+.landing {
+  min-height: 100vh;
+  padding: var(--space-lg) var(--space-xl);
+}
+
+.landing-content {
+  max-width: 700px;
+  margin: 0 auto;
+  padding-top: 160px;
+  text-align: center;
+}
+
+.landing-content h1 {
+  margin: 0;
+  font-size: 64px;
+  line-height: 1.05;
+}
+
+.landing-content p {
+  margin-top: var(--space-lg);
+  font-size: 18px;
+  line-height: 1.6;
+}
+
+.landing-actions {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 40px;
+  margin-top: 40px;
+}
+
+.landing-actions blockquote {
+  margin: 0;
+  font-size: 14px;
+  font-style: italic;
+  text-align: left;
+}

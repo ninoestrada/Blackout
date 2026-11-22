@@ -1,8 +1,14 @@
+/**
+ * Blackout's root layout.
+ * Defines the layout shared across all pages.
+ */
+
 import type { Metadata } from "next";
-import Link from "next/link";
 import { Space_Mono } from "next/font/google";
+
+import Navbar from "@/components/Navbar";
+
 import "./globals.css";
-import AuthButton from "@/components/AuthButton";
 
 const spaceMono = Space_Mono({
   subsets: ["latin"],
@@ -14,6 +20,12 @@ export const metadata: Metadata = {
   description: "Create blackout poetry",
 };
 
+/**
+ * Renders the shared layout for all pages.
+ *
+ * @param children - The content displayed inside the layout.
+ * @returns The root layout.
+ */
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -22,14 +34,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={spaceMono.className}>
-        <header className="landing-header">
-          <Link href="/" className="site-title">
-            <span className="marked-word">black</span>out
-          </Link>
-
-          <AuthButton />
-        </header>
-
+        <Navbar />
         {children}
       </body>
     </html>

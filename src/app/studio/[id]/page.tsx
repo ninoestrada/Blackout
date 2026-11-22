@@ -1,17 +1,36 @@
+/**
+ * Loads saved poems into Blackout's Studio.
+ * Restores the poem's text, blacked-out words, and drawings for editing.
+ */
+
 "use client";
 
 import { use, useEffect, useState } from "react";
+
 import { supabase } from "@/lib/supabase";
-import Studio, { type DrawingData, type Stroke } from "../Studio";
+
+import Studio from "../Studio";
+import type { DrawingData, Stroke } from "../types";
 
 type SavedPoem = {
+  /** Unique ID of the saved poem. */
   id: string;
+  /** Title of the poem, if provided. */
   title: string | null;
+  /** Original text used to create the poem. */
   source_text: string;
+  /** Positions of the words that have been blacked out. */
   blackout_data: number[];
+  /** Drawings saved with the poem, including their strokes and canvas dimensions when available. */
   drawing_data: Stroke[] | DrawingData;
 };
 
+/**
+ * Loads a saved poem and displays it in the Studio editor.
+ *
+ * @param params - Contains the ID of the poem to load.
+ * @returns The Studio editor, a loading or error message, or null.
+ */
 export default function SavedStudio({
   params,
 }: {
@@ -24,6 +43,10 @@ export default function SavedStudio({
   const [error, setError] = useState("");
 
   useEffect(() => {
+    /**
+     * Loads the saved poem from Supabase using its ID.
+     * Updates the page with the poem or displays an error if loading fails.
+     */
     async function fetchPoem() {
       const { data, error } = await supabase
         .from("poems")

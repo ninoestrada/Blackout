@@ -1,3 +1,10 @@
+/**
+ * Global styles for Blackout.
+ * Includes colors, spacing, header, navigation, and button styles.
+ */
+
+/* ---------------------------------------- Theme Variables ---------------------------------------- */
+
 :root {
   --color-background: #f0f0f0;
   --color-text: #505050;
@@ -11,42 +18,12 @@
   --space-xl: 48px;
 }
 
-* {
+/* ---------------------------------------- Base Styles ---------------------------------------- */
+
+*,
+*::before,
+*::after {
   box-sizing: border-box;
-}
-
-@media (max-width: 600px) {
-  .landing-header {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: 16px;
-    padding: 20px 16px;
-  }
-
-  .site-title {
-    font-size: 26px;
-    margin-right: auto;
-  }
-
-  .account-nav {
-    display: contents;
-  }
-
-  .account-nav .landing-button {
-    order: 1;
-    padding: 10px 14px;
-    font-size: 12px;
-  }
-
-  .nav-link {
-    order: 2;
-    font-size: 13px;
-  }
-
-  .nav-link:first-of-type {
-    margin-left: 0;
-  }
 }
 
 body {
@@ -55,15 +32,25 @@ body {
   color: var(--color-text);
 }
 
-.landing {
-  min-height: 100vh;
-  padding: 32px 48px;
+/* ---------------------------------------- Header & Navigation ---------------------------------------- */
+
+.site-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--space-lg) var(--space-xl);
 }
 
 .site-title {
   color: var(--color-text);
   font-size: 35px;
   font-weight: 700;
+  text-decoration: none;
+}
+
+.site-title:focus-visible {
+  outline: 2px solid var(--color-text);
+  outline-offset: 4px;
 }
 
 .marked-word {
@@ -73,42 +60,18 @@ body {
 .marked-word::after {
   content: "";
   position: absolute;
-
   left: -2px;
   right: -2px;
-
   top: 52%;
   height: 5px;
-
   background-color: var(--color-text);
   transform: rotate(-2deg);
 }
 
-.landing-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 32px 48px;
-}
-
-.landing-button {
-  display: inline-block;
-  padding: 14px 24px;
-
-  background-color: var(--color-text);
-  color: var(--color-background);
-  border: 1px solid var(--color-border);
-
-  text-decoration: none;
-  font: inherit;
-  font-size: 14px;
-  cursor: pointer;
-}
-
-.account-nav {
+.site-nav {
   display: flex;
   align-items: center;
-  gap: 32px;
+  gap: var(--space-lg);
 }
 
 .nav-link {
@@ -126,52 +89,46 @@ body {
   outline-offset: 4px;
 }
 
-.landing-content {
-  max-width: 700px;
-  margin: 0 auto;
-  padding-top: 160px;
-  text-align: center;
-}
+/* ---------------------------------------- Shared Buttons ---------------------------------------- */
 
-.landing-content h1 {
-  font-size: 64px;
-  line-height: 1.05;
-  margin: 0;
-}
-
-.landing-content p {
-  margin-top: 32px;
-  font-size: 18px;
-  line-height: 1.6;
-}
-
-.landing-actions {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 40px;
-  margin-top: 40px;
-}
-
-.here-text {
-  color: var(--color-text);
-}
-
-.landing-actions blockquote {
-  margin: 0;
-  text-align: left;
-  font-style: italic;
+.primary-button {
+  display: inline-block;
+  padding: 14px 24px;
+  border: 1px solid var(--color-border);
+  background-color: var(--color-text);
+  color: var(--color-background);
+  font: inherit;
   font-size: 14px;
-}
-
-.site-title {
-  color: var(--color-text);
-  font-size: 35px;
-  font-weight: 700;
   text-decoration: none;
+  cursor: pointer;
 }
 
-.site-title:focus-visible {
-  outline: 2px solid var(--color-text);
-  outline-offset: 4px;
+/* ---------------------------------------- Responsive Styles ---------------------------------------- */
+
+@media (max-width: 600px) {
+  .site-header {
+    flex-wrap: wrap;
+    gap: var(--space-sm);
+    padding: 20px var(--space-sm);
+  }
+
+  .site-title {
+    margin-right: auto;
+    font-size: 26px;
+  }
+
+  .site-nav {
+    display: contents;
+  }
+
+  .site-nav .primary-button {
+    order: 1;
+    padding: 10px 14px;
+    font-size: 12px;
+  }
+
+  .nav-link {
+    order: 2;
+    font-size: 13px;
+  }
 }
