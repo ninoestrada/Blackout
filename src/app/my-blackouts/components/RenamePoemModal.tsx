@@ -50,7 +50,7 @@ export default function RenamePoemModal({
       confirmDisabled={!newTitle.trim()}
       isProcessing={isRenaming}
     >
-      <div className={styles.renameField}>
+      <div className={styles.renameTitleField}>
         <label htmlFor="rename-input">Title</label>
 
         <input

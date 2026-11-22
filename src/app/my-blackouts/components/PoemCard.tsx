@@ -48,9 +48,9 @@ export default function PoemCard({
     : drawingData.width;
 
   return (
-    <div className={styles.poem}>
+    <div className={styles.poemCard}>
       <Link href={`/studio/${poem.id}`} className={styles.poemLink}>
-        <div className={styles.preview}>
+        <div className={styles.poemPreview}>
           {poem.source_text.split(/(\s+)/).map((part, index) => (
             <span
               key={index}
@@ -78,7 +78,7 @@ export default function PoemCard({
 
       <button
         type="button"
-        className={styles.menuButton}
+        className={styles.poemMenuButton}
         data-poem-menu={poem.id}
         onClick={onToggleMenu}
         aria-label={`More options for ${poem.title || "Untitled"}`}
