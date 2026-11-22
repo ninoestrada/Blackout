@@ -17,7 +17,7 @@ const victorMono = Victor_Mono({
 /**
  * Renders the homepage with an introduction and a link to the workspace.
  *
- * @returns The homepage JSX.
+ * @returns The homepage.
  */
 export default function Home() {
   return (

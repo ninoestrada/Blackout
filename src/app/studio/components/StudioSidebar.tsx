@@ -1,9 +1,9 @@
-"use client";
-
 /**
  * Blackout's Studio sidebar.
  * Provides tools for selecting, drawing, and managing edit history.
  */
+
+"use client";
 
 import type { RefObject } from "react";
 

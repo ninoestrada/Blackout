@@ -1,9 +1,9 @@
-"use client";
-
 /**
  * Blackout's confirmation modal.
  * Asks users to confirm actions, such as deleting or renaming a poem.
  */
+
+"use client";
 
 import {
   useEffect,
@@ -16,20 +16,27 @@ import {
 import styles from "../page.module.css";
 
 type ConfirmationModalProps = {
+  /** The modal's title. */
   title: string;
+  /** Explains what the user is being asked to confirm. */
   message: string;
+  /** Optional content shown below the message. */
   children?: ReactNode;
-
+  /** The text on the confirmation button. */
   confirmLabel?: string;
+  /** Whether to disable the confirmation button. */
   confirmDisabled?: boolean;
+  /** Whether the action is still in progress. */
   isProcessing?: boolean;
-
+  /** Whether the user has checked "Don't show this again". */
   dontShowAgain?: boolean;
+  /** Called when the user changes the checkbox selection. */
   onDontShowAgainChange?: (checked: boolean) => void;
-
+  /** Reference to the input field to focus when the modal opens. */
   initialFocusRef?: RefObject<HTMLInputElement | null>;
-
+  /** Called when the user cancels the action. */
   onCancel: () => void;
+  /** Called when the user confirms the action. */
   onConfirm: () => void;
 };
 
@@ -37,7 +44,7 @@ type ConfirmationModalProps = {
  * Displays a confirmation modal with options to confirm or cancel an action.
  * Allows users to navigate the modal with their keyboard and keeps the focus inside it until it closes.
  *
- * @returns The confirmation modal JSX.
+ * @returns The confirmation modal.
  */
 export default function ConfirmationModal({
   title,
@@ -61,7 +68,7 @@ export default function ConfirmationModal({
   const latestInitialFocusRef = useRef(initialFocusRef);
   const isProcessingRef = useRef(isProcessing);
 
-  // Keep the modal's values up to date so keyboard actions work correctly.
+  // Keep the values used by the keyboard handler up to date.
   useEffect(() => {
     onCancelRef.current = onCancel;
     latestInitialFocusRef.current = initialFocusRef;
@@ -71,7 +78,7 @@ export default function ConfirmationModal({
   useEffect(() => {
     const previouslyFocusedElement = document.activeElement;
 
-    // Focus the name field when renaming a poem; otherwise, focus the Cancel button.
+    // Focus Cancel by default to prevent accidental confirmation.
     if (latestInitialFocusRef.current?.current) {
       latestInitialFocusRef.current.current.focus();
       latestInitialFocusRef.current.current.select();
@@ -138,7 +145,6 @@ export default function ConfirmationModal({
 
     document.addEventListener("keydown", handleKeyDown, true);
 
-    // Stop handling keyboard input and return focus to where it was before the modal opened.
     return () => {
       document.removeEventListener("keydown", handleKeyDown, true);
 

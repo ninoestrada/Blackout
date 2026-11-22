@@ -8,7 +8,7 @@ import Studio from "./Studio";
 /**
  * Renders the Studio workspace.
  *
- * @returns The Studio page JSX.
+ * @returns The Studio page.
  */
 export default function StudioPage() {
   return <Studio />;

@@ -1,9 +1,9 @@
-"use client";
-
 /**
  * Blackout's poem workspace.
  * Displays the editable poem, blackout selections, and drawing canvas.
  */
+
+"use client";
 
 import type { PointerEvent, RefObject } from "react";
 import { Highlighter } from "lucide-react";

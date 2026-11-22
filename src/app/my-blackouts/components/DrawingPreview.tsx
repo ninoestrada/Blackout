@@ -1,9 +1,9 @@
-"use client";
-
 /**
  * Blackout's drawing preview for saved poems.
  * Displays and scales drawings from saved blackout poems.
  */
+
+"use client";
 
 import { useEffect, useRef } from "react";
 

@@ -1,9 +1,9 @@
-"use client";
-
 /**
  * Blackout's Studio workspace.
  * Lets users create, edit, save, and export blackout poetry.
  */
+
+"use client";
 
 // React
 import { useEffect, useRef, useState } from "react";
@@ -32,20 +32,26 @@ import styles from "./page.module.css";
 import type { Stroke, StudioTool } from "./types";
 
 type StudioProps = {
+  /** ID of the poem being edited. */
   poemId?: string;
+  /** The saved poem's title, if it has one. */
   initialTitle?: string | null;
+  /** The passage used to create the poem. */
   initialPassage?: string;
+  /** Positions of the previously blacked-out words. */
   initialBlackout?: number[];
+  /** Drawings previously saved with the poem. */
   initialDrawing?: Stroke[];
+  /** Width of the canvas when the poem was saved. */
   initialDrawingWidth?: number;
+  /** Height of the canvas when the poem was saved. */
   initialDrawingHeight?: number;
 };
 
 /**
  * Renders the Studio editor and its tools.
  *
- * @param props - The poem data used when opening the editor.
- * @returns The Studio JSX.
+ * @returns The Studio.
  */
 export default function Studio({
   poemId,

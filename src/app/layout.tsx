@@ -24,7 +24,7 @@ export const metadata: Metadata = {
  * Renders the shared layout for all pages.
  *
  * @param children - The content displayed inside the layout.
- * @returns The root layout JSX.
+ * @returns The root layout.
  */
 export default function RootLayout({
   children,

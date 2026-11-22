@@ -28,6 +28,7 @@ type SavedPoem = {
 /**
  * Loads a saved poem and displays it in the Studio editor.
  *
+ * @param params - Contains the ID of the poem to load.
  * @returns The Studio editor, a loading or error message, or null.
  */
 export default function SavedStudio({
@@ -42,6 +43,10 @@ export default function SavedStudio({
   const [error, setError] = useState("");
 
   useEffect(() => {
+    /**
+     * Loads the saved poem from Supabase using its ID.
+     * Updates the page with the poem or displays an error if loading fails.
+     */
     async function fetchPoem() {
       const { data, error } = await supabase
         .from("poems")

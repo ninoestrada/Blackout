@@ -1,9 +1,9 @@
-"use client";
-
 /**
  * Blackout's My Blackouts page.
  * Displays saved poems and allows users to edit, rename, and delete them.
  */
+
+"use client";
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
