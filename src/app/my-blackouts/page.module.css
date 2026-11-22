@@ -1,10 +1,15 @@
-/* ---------- Page layout ---------- */
+/**
+ * Styles for the My Blackouts page.
+ * Includes the page layout, saved poem cards, previews, menus, and rename modal.
+ */
+
+/* ---------------------------------------- Page Layout ---------------------------------------- */
 
 .content {
   width: 100%;
   max-width: 1200px;
   margin: 0 auto;
-  padding: 96px 32px 160px;
+  padding: 96px var(--space-lg) 160px;
 }
 
 .heading {
@@ -13,15 +18,17 @@
   font-weight: 700;
 }
 
-/* ---------- Saved poem grid ---------- */
+/* ---------------------------------------- Saved Poem Grid ---------------------------------------- */
 
 .poemList {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-  gap: 24px;
+  gap: var(--space-md);
 }
 
-.poem {
+/* ---------------------------------------- Poem Cards ---------------------------------------- */
+
+.poemCard {
   position: relative;
   min-width: 0;
 }
@@ -37,48 +44,42 @@
   outline-offset: 4px;
 }
 
-.poem h2 {
+.poemCard h2 {
   margin: 12px 0 4px;
   font-size: 18px;
   font-weight: 700;
 }
 
-.poem p {
+.poemCard p {
   margin: 0;
   font-size: 14px;
 }
 
-/* ---------- Poem previews ---------- */
+/* ---------------------------------------- Poem Previews ---------------------------------------- */
 
-.preview {
+.poemPreview {
   position: relative;
-
   height: 220px;
-  overflow: hidden;
   padding: 20px;
-
+  overflow: hidden;
   border: 1px solid var(--color-border);
-
   font-size: 12px;
   line-height: 1.6;
   text-align: left;
-
   transition:
     border-color 150ms ease,
     background-color 150ms ease;
 }
 
-.poemLink:hover .preview {
+.poemLink:hover .poemPreview {
   background-color: var(--color-surface);
 }
 
 .drawingPreview {
   position: absolute;
   inset: 0;
-
   width: 100%;
   height: 100%;
-
   pointer-events: none;
 }
 
@@ -87,34 +88,30 @@
   color: var(--color-text);
 }
 
-/* ---------- Three-dot actions menu ---------- */
+/* ---------------------------------------- Poem Menu ---------------------------------------- */
 
-.menuButton {
+.poemMenuButton {
   position: absolute;
-  top: 8px;
-  right: 8px;
+  top: var(--space-xs);
+  right: var(--space-xs);
   z-index: 1;
-
   display: flex;
   align-items: center;
   justify-content: center;
-
   width: 32px;
   height: 32px;
   padding: 0;
-
   border: 1px solid transparent;
   background-color: var(--color-background);
   color: var(--color-text);
-
   cursor: pointer;
 }
 
-.menuButton:hover {
+.poemMenuButton:hover {
   border-color: var(--color-border);
 }
 
-.menuButton:focus-visible {
+.poemMenuButton:focus-visible {
   outline: 2px solid var(--color-text);
   outline-offset: 2px;
 }
@@ -122,11 +119,9 @@
 .poemMenu {
   position: absolute;
   top: 44px;
-  right: 8px;
+  right: var(--space-xs);
   z-index: 2;
-
   min-width: 120px;
-
   border: 1px solid var(--color-border);
   background-color: var(--color-background);
 }
@@ -134,19 +129,15 @@
 .poemMenu button {
   display: flex;
   align-items: center;
-  gap: 8px;
-
+  gap: var(--space-xs);
   width: 100%;
   padding: 10px 12px;
-
   border: none;
   background-color: transparent;
   color: var(--color-text);
-
   font: inherit;
   font-size: 12px;
   text-align: left;
-
   cursor: pointer;
 }
 
@@ -160,96 +151,21 @@
   outline-offset: -3px;
 }
 
-/* ---------- Status messages ---------- */
+/* ---------------------------------------- Rename Modal ---------------------------------------- */
 
-.statusMessage {
-  margin: 0;
-  font-size: 16px;
-}
-
-/* ---------- Toast notifications ---------- */
-
-.toast {
-  position: fixed;
-  right: 24px;
-  bottom: 24px;
-  z-index: 1000;
-
-  padding: 12px 16px;
-
-  background-color: var(--color-text);
-  color: var(--color-background);
-
-  font-size: 14px;
-}
-
-/* ---------- Tablet ---------- */
-
-@media (max-width: 768px) {
-  .content {
-    padding: 64px 24px 100px;
-  }
-
-  .poemList {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 20px;
-  }
-
-  .heading {
-    font-size: 28px;
-    margin-bottom: 32px;
-  }
-}
-
-/* ---------- Mobile ---------- */
-
-@media (max-width: 600px) {
-  .content {
-    padding: 40px 16px 80px;
-  }
-
-  .poemList {
-    grid-template-columns: minmax(0, 400px);
-    justify-content: center;
-    gap: 24px;
-  }
-
-  .poem {
-    width: 100%;
-    min-width: 0;
-  }
-
-  .preview {
-    width: 100%;
-  }
-
-  .heading {
-    font-size: 26px;
-    text-align: center;
-  }
-
-  .toast {
-    right: 16px;
-    bottom: 16px;
-    max-width: calc(100vw - 32px);
-  }
-}
-
-/* ---------- Rename input ---------- */
-
-.renameField {
+.renameTitleField {
   display: flex;
   flex-direction: column;
   gap: 10px;
   margin: 20px 0;
 }
 
-.renameField label {
+.renameTitleField label {
   font-size: 13px;
   font-weight: 700;
 }
 
-.renameField input {
+.renameTitleField input {
   width: 100%;
   min-width: 0;
   padding: 12px;
@@ -261,7 +177,7 @@
   font-size: 14px;
 }
 
-.renameField input:focus-visible {
+.renameTitleField input:focus-visible {
   outline: 2px solid var(--color-text);
   outline-offset: 2px;
 }
@@ -270,4 +186,71 @@
   margin: 0;
   font-size: 12px;
   line-height: 1.5;
+}
+
+/* ---------------------------------------- Status Messages ---------------------------------------- */
+
+.statusMessage {
+  margin: 0;
+  font-size: 16px;
+}
+
+.toast {
+  position: fixed;
+  right: var(--space-md);
+  bottom: var(--space-md);
+  z-index: 1000;
+  padding: 12px var(--space-sm);
+  background-color: var(--color-text);
+  color: var(--color-background);
+  font-size: 14px;
+}
+
+/* ---------------------------------------- Responsive Styles ---------------------------------------- */
+
+@media (max-width: 768px) {
+  .content {
+    padding: 64px var(--space-md) 100px;
+  }
+
+  .heading {
+    margin-bottom: var(--space-lg);
+    font-size: 28px;
+  }
+
+  .poemList {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 20px;
+  }
+}
+
+@media (max-width: 600px) {
+  .content {
+    padding: 40px var(--space-sm) 80px;
+  }
+
+  .heading {
+    font-size: 26px;
+    text-align: center;
+  }
+
+  .poemList {
+    grid-template-columns: minmax(0, 400px);
+    justify-content: center;
+    gap: var(--space-md);
+  }
+
+  .poemCard {
+    width: 100%;
+  }
+
+  .poemPreview {
+    width: 100%;
+  }
+
+  .toast {
+    right: var(--space-sm);
+    bottom: var(--space-sm);
+    max-width: calc(100vw - 2 * var(--space-sm));
+  }
 }

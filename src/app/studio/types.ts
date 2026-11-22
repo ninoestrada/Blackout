@@ -1,5 +1,5 @@
 /**
- * Blackout's shared Studio types.
+ * Blackout's shared types for the Studio page.
  * Defines types used across Studio components, hooks, and utilities.
  */
 
