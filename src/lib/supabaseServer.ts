@@ -1,6 +1,16 @@
+/**
+ * Blackout's Supabase server client.
+ * Handles authentication and database access from the server.
+ */
+
 import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
 
+/**
+ * Creates a server-side Supabase client using cookies to keep users signed in.
+ *
+ * @returns The configured Supabase client.
+ */
 export async function createSupabaseServerClient() {
   const cookieStore = await cookies();
 
@@ -19,7 +29,7 @@ export async function createSupabaseServerClient() {
               cookieStore.set(name, value, options);
             });
           } catch {
-            // Cookies cannot be changed from every Server Component context.
+            // Ignore errors when cookies cannot be updated.
           }
         },
       },
