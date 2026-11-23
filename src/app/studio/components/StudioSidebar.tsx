@@ -7,6 +7,8 @@
 
 import type { RefObject } from "react";
 
+import { AnimatePresence, motion } from "motion/react";
+
 import styles from "../page.module.css";
 
 import type { StudioTool } from "../types";
@@ -32,7 +34,7 @@ type StudioSidebarProps = {
 /**
  * Displays the Studio's editing tools and history controls.
  *
- * @returns The Studio sidebar JSX.
+ * @returns The Studio sidebar.
  */
 export default function StudioSidebar({
   tool,
@@ -54,33 +56,47 @@ export default function StudioSidebar({
         <span className={styles.toolLabel}>Tools</span>
 
         <div className={styles.toolButtons}>
-          <button
+          <motion.button
             type="button"
             aria-pressed={tool === "select"}
             className={`${styles.toolButton} ${
               tool === "select" ? styles.activeTool : ""
             }`}
             onClick={() => setTool("select")}
+            whileHover={{ scale: 1.03 }}
+            whileTap={{ scale: 0.97 }}
+            transition={{ duration: 0.15 }}
           >
             Select
-          </button>
+          </motion.button>
 
-          <button
+          <motion.button
             type="button"
             aria-pressed={tool === "draw"}
             className={`${styles.toolButton} ${
               tool === "draw" ? styles.activeTool : ""
             }`}
             onClick={() => setTool("draw")}
+            whileHover={{ scale: 1.03 }}
+            whileTap={{ scale: 0.97 }}
+            transition={{ duration: 0.15 }}
           >
             Draw
-          </button>
+          </motion.button>
         </div>
       </div>
 
-      {tool === "draw" && (
-        <>
-          <div className={styles.toolSection}>
+      <AnimatePresence initial={false}>
+        {tool === "draw" && (
+          <motion.div
+            key="color-controls"
+            className={styles.toolSection}
+            initial={{ opacity: 0, y: -6 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -6 }}
+            transition={{ duration: 0.15 }}
+            inert={tool !== "draw"}
+          >
             <span className={styles.toolLabel}>Color</span>
 
             <div className={styles.colorControl}>
@@ -95,7 +111,7 @@ export default function StudioSidebar({
 
               <div className={styles.recentColors}>
                 {recentColors.map((color) => (
-                  <button
+                  <motion.button
                     key={color}
                     type="button"
                     className={styles.colorSwatch}
@@ -103,13 +119,26 @@ export default function StudioSidebar({
                     onClick={() => setDrawingColor(color)}
                     aria-label={`Use color ${color}`}
                     aria-pressed={drawingColor === color}
+                    whileHover={{ scale: 1.1 }}
+                    whileTap={{ scale: 0.95 }}
+                    transition={{ duration: 0.15 }}
                   />
                 ))}
               </div>
             </div>
-          </div>
+          </motion.div>
+        )}
 
-          <div className={styles.toolSection}>
+        {tool === "draw" && (
+          <motion.div
+            key="marker-controls"
+            className={styles.toolSection}
+            initial={{ opacity: 0, y: -6 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -6 }}
+            transition={{ duration: 0.15 }}
+            inert={tool !== "draw"}
+          >
             <label className={styles.toolLabel} htmlFor="marker-size">
               Marker Size
             </label>
@@ -134,31 +163,37 @@ export default function StudioSidebar({
 
               <span>px</span>
             </div>
-          </div>
-        </>
-      )}
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       <div className={styles.toolSection}>
         <span className={styles.toolLabel}>History</span>
 
         <div className={styles.historyButtons}>
-          <button
+          <motion.button
             type="button"
             className={styles.toolButton}
             onClick={undo}
             disabled={!canUndo}
+            whileHover={canUndo ? { scale: 1.03 } : undefined}
+            whileTap={canUndo ? { scale: 0.97 } : undefined}
+            transition={{ duration: 0.15 }}
           >
             Undo
-          </button>
+          </motion.button>
 
-          <button
+          <motion.button
             type="button"
             className={styles.toolButton}
             onClick={redo}
             disabled={!canRedo}
+            whileHover={canRedo ? { scale: 1.03 } : undefined}
+            whileTap={canRedo ? { scale: 0.97 } : undefined}
+            transition={{ duration: 0.15 }}
           >
             Redo
-          </button>
+          </motion.button>
         </div>
       </div>
     </aside>
