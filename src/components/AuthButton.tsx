@@ -5,6 +5,8 @@
 
 "use client";
 
+import { motion } from "motion/react";
+
 import { supabase } from "@/lib/supabase";
 
 type AuthButtonProps = {
@@ -14,7 +16,7 @@ type AuthButtonProps = {
 /**
  * Renders a sign-in or sign-out button based on the user's authentication state.
  *
- * @returns The authentication button JSX.
+ * @returns The authentication button.
  */
 export default function AuthButton({ isSignedIn }: AuthButtonProps) {
   /**
@@ -52,12 +54,26 @@ export default function AuthButton({ isSignedIn }: AuthButtonProps) {
   }
 
   return isSignedIn ? (
-    <button type="button" className="primary-button" onClick={handleSignOut}>
+    <motion.button
+      type="button"
+      className="primary-button"
+      onClick={handleSignOut}
+      whileHover={{ scale: 1.03 }}
+      whileTap={{ scale: 0.97 }}
+      transition={{ duration: 0.15 }}
+    >
       Sign out
-    </button>
+    </motion.button>
   ) : (
-    <button type="button" className="primary-button" onClick={handleSignIn}>
+    <motion.button
+      type="button"
+      className="primary-button"
+      onClick={handleSignIn}
+      whileHover={{ scale: 1.03 }}
+      whileTap={{ scale: 0.97 }}
+      transition={{ duration: 0.15 }}
+    >
       Sign in
-    </button>
+    </motion.button>
   );
 }
