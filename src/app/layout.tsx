@@ -8,6 +8,8 @@ import { Space_Mono } from "next/font/google";
 
 import Navbar from "@/components/Navbar";
 
+import MotionProvider from "./MotionProvider";
+
 import "./globals.css";
 
 const spaceMono = Space_Mono({
@@ -34,8 +36,10 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={spaceMono.className}>
-        <Navbar />
-        {children}
+        <MotionProvider>
+          <Navbar />
+          {children}
+        </MotionProvider>
       </body>
     </html>
   );

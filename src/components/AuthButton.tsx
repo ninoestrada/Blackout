@@ -1,9 +1,9 @@
-"use client";
-
 /**
  * Blackout's authentication button.
  * Handles Google sign-in and sign-out.
  */
+
+"use client";
 
 import { supabase } from "@/lib/supabase";
 
