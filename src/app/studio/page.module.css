@@ -255,6 +255,9 @@
   font: inherit;
   font-size: 13px;
   cursor: pointer;
+  transition:
+    background-color 0.15s ease,
+    opacity 0.15s ease;
 }
 
 .primaryButton,
