@@ -3,13 +3,19 @@
  * Displays a preview, title, creation date, and options to edit, rename, or delete the poem.
  */
 
-import { Ellipsis, Pencil, SquarePen, Trash2 } from "lucide-react";
+"use client";
+
+import { Ellipsis } from "lucide-react";
+import { AnimatePresence, motion } from "motion/react";
 import Link from "next/link";
 
 import DrawingPreview from "./DrawingPreview";
+import PoemMenu from "./PoemMenu";
 import type { SavedPoem } from "../types";
 
 import styles from "../page.module.css";
+
+const MotionLink = motion.create(Link);
 
 type PoemCardProps = {
   /** The saved poem to display. */
@@ -49,7 +55,12 @@ export default function PoemCard({
 
   return (
     <div className={styles.poemCard}>
-      <Link href={`/studio/${poem.id}`} className={styles.poemLink}>
+      <MotionLink
+        href={`/studio/${poem.id}`}
+        className={styles.poemLink}
+        whileHover={{ y: -3 }}
+        transition={{ duration: 0.15 }}
+      >
         <div className={styles.poemPreview}>
           {poem.source_text.split(/(\s+)/).map((part, index) => (
             <span
@@ -74,9 +85,9 @@ export default function PoemCard({
             year: "numeric",
           })}
         </p>
-      </Link>
+      </MotionLink>
 
-      <button
+      <motion.button
         type="button"
         className={styles.poemMenuButton}
         data-poem-menu={poem.id}
@@ -84,28 +95,23 @@ export default function PoemCard({
         aria-label={`More options for ${poem.title || "Untitled"}`}
         aria-expanded={isMenuOpen}
         aria-haspopup="true"
+        whileHover={{ scale: 1.05 }}
+        whileTap={{ scale: 0.95 }}
+        transition={{ duration: 0.15 }}
       >
         <Ellipsis size={20} />
-      </button>
+      </motion.button>
 
-      {isMenuOpen && (
-        <div className={styles.poemMenu}>
-          <button type="button" onClick={onEdit}>
-            <SquarePen size={14} />
-            Edit
-          </button>
-
-          <button type="button" onClick={onRename}>
-            <Pencil size={14} />
-            Rename
-          </button>
-
-          <button type="button" onClick={onDelete}>
-            <Trash2 size={14} />
-            Delete
-          </button>
-        </div>
-      )}
+      <AnimatePresence>
+        {isMenuOpen && (
+          <PoemMenu
+            key="poem-menu"
+            onEdit={onEdit}
+            onRename={onRename}
+            onDelete={onDelete}
+          />
+        )}
+      </AnimatePresence>
     </div>
   );
 }
