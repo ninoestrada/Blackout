@@ -207,6 +207,9 @@
 
 .passage span {
   cursor: pointer;
+  transition:
+    background-color 0.15s ease,
+    color 0.15s ease;
 }
 
 .blackedOut {
@@ -537,5 +540,17 @@
   .closeButton {
     top: 12px;
     right: 12px;
+  }
+}
+
+/* --------------- Reduced motion --------------- */
+
+@media (prefers-reduced-motion: reduce) {
+  .toolButton,
+  .primaryButton,
+  .secondaryButton,
+  .fragmentButton,
+  .passage span {
+    transition: none;
   }
 }
