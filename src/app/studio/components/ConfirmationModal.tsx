@@ -14,6 +14,8 @@ import {
   type RefObject,
 } from "react";
 
+import { buttonAnimation } from "@/lib/animations";
+
 import styles from "../page.module.css";
 
 type ConfirmationModalProps = {
@@ -225,9 +227,7 @@ export default function ConfirmationModal({
             className={styles.modalButton}
             onClick={onCancel}
             disabled={isProcessing}
-            whileHover={!isProcessing ? { scale: 1.03 } : undefined}
-            whileTap={!isProcessing ? { scale: 0.97 } : undefined}
-            transition={{ duration: 0.15 }}
+            {...buttonAnimation(isProcessing)}
           >
             Cancel
           </motion.button>
@@ -237,9 +237,7 @@ export default function ConfirmationModal({
             className={styles.modalButton}
             onClick={onConfirm}
             disabled={isConfirmDisabled}
-            whileHover={!isConfirmDisabled ? { scale: 1.03 } : undefined}
-            whileTap={!isConfirmDisabled ? { scale: 0.97 } : undefined}
-            transition={{ duration: 0.15 }}
+            {...buttonAnimation(isConfirmDisabled)}
           >
             {isProcessing ? "Saving..." : confirmLabel}
           </motion.button>

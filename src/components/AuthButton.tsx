@@ -7,6 +7,7 @@
 
 import { motion } from "motion/react";
 
+import { buttonAnimation } from "@/lib/animations";
 import { supabase } from "@/lib/supabase";
 
 type AuthButtonProps = {
@@ -58,9 +59,7 @@ export default function AuthButton({ isSignedIn }: AuthButtonProps) {
       type="button"
       className="primary-button"
       onClick={handleSignOut}
-      whileHover={{ scale: 1.03 }}
-      whileTap={{ scale: 0.97 }}
-      transition={{ duration: 0.15 }}
+      {...buttonAnimation()}
     >
       Sign out
     </motion.button>
@@ -69,9 +68,7 @@ export default function AuthButton({ isSignedIn }: AuthButtonProps) {
       type="button"
       className="primary-button"
       onClick={handleSignIn}
-      whileHover={{ scale: 1.03 }}
-      whileTap={{ scale: 0.97 }}
-      transition={{ duration: 0.15 }}
+      {...buttonAnimation()}
     >
       Sign in
     </motion.button>

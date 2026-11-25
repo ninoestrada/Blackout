@@ -9,6 +9,8 @@ import type { RefObject } from "react";
 
 import { AnimatePresence, motion } from "motion/react";
 
+import { buttonAnimation } from "@/lib/animations";
+
 import styles from "../page.module.css";
 
 import type { StudioTool } from "../types";
@@ -63,9 +65,7 @@ export default function StudioSidebar({
               tool === "select" ? styles.activeTool : ""
             }`}
             onClick={() => setTool("select")}
-            whileHover={{ scale: 1.03 }}
-            whileTap={{ scale: 0.97 }}
-            transition={{ duration: 0.15 }}
+            {...buttonAnimation()}
           >
             Select
           </motion.button>
@@ -77,9 +77,7 @@ export default function StudioSidebar({
               tool === "draw" ? styles.activeTool : ""
             }`}
             onClick={() => setTool("draw")}
-            whileHover={{ scale: 1.03 }}
-            whileTap={{ scale: 0.97 }}
-            transition={{ duration: 0.15 }}
+            {...buttonAnimation()}
           >
             Draw
           </motion.button>
@@ -176,9 +174,7 @@ export default function StudioSidebar({
             className={styles.toolButton}
             onClick={undo}
             disabled={!canUndo}
-            whileHover={canUndo ? { scale: 1.03 } : undefined}
-            whileTap={canUndo ? { scale: 0.97 } : undefined}
-            transition={{ duration: 0.15 }}
+            {...buttonAnimation(!canUndo)}
           >
             Undo
           </motion.button>
@@ -188,9 +184,7 @@ export default function StudioSidebar({
             className={styles.toolButton}
             onClick={redo}
             disabled={!canRedo}
-            whileHover={canRedo ? { scale: 1.03 } : undefined}
-            whileTap={canRedo ? { scale: 0.97 } : undefined}
-            transition={{ duration: 0.15 }}
+            {...buttonAnimation(!canRedo)}
           >
             Redo
           </motion.button>

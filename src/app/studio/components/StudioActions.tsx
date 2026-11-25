@@ -7,6 +7,8 @@
 
 import { motion } from "motion/react";
 
+import { buttonAnimation } from "@/lib/animations";
+
 import styles from "../page.module.css";
 
 type StudioActionsProps = {
@@ -45,9 +47,7 @@ export default function StudioActions({
           className={styles.secondaryButton}
           onClick={onFreshFragment}
           disabled={isSaving}
-          whileHover={!isSaving ? { scale: 1.03 } : undefined}
-          whileTap={!isSaving ? { scale: 0.97 } : undefined}
-          transition={{ duration: 0.15 }}
+          {...buttonAnimation(isSaving)}
         >
           Fresh Fragment
         </motion.button>
@@ -58,9 +58,7 @@ export default function StudioActions({
         className={styles.secondaryButton}
         onClick={onCleanSlate}
         disabled={isSaving}
-        whileHover={!isSaving ? { scale: 1.03 } : undefined}
-        whileTap={!isSaving ? { scale: 0.97 } : undefined}
-        transition={{ duration: 0.15 }}
+        {...buttonAnimation(isSaving)}
       >
         Clean Slate
       </motion.button>
@@ -70,9 +68,7 @@ export default function StudioActions({
         className={styles.primaryButton}
         onClick={onSave}
         disabled={isSaving}
-        whileHover={!isSaving ? { scale: 1.03 } : undefined}
-        whileTap={!isSaving ? { scale: 0.97 } : undefined}
-        transition={{ duration: 0.15 }}
+        {...buttonAnimation(isSaving)}
       >
         {isSaving ? "Saving..." : savedPoemId ? "Save Changes" : "Save"}
       </motion.button>
@@ -82,9 +78,7 @@ export default function StudioActions({
         className={styles.secondaryButton}
         onClick={onExport}
         disabled={isExporting}
-        whileHover={!isExporting ? { scale: 1.03 } : undefined}
-        whileTap={!isExporting ? { scale: 0.97 } : undefined}
-        transition={{ duration: 0.15 }}
+        {...buttonAnimation(isExporting)}
       >
         {isExporting ? "Exporting..." : "Export PNG"}
       </motion.button>
