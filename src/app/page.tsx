@@ -4,7 +4,8 @@
  */
 
 import { Victor_Mono } from "next/font/google";
-import Link from "next/link";
+
+import PrimaryLink from "@/components/PrimaryLink";
 
 import styles from "./page.module.css";
 
@@ -38,9 +39,7 @@ export default function Home() {
         </p>
 
         <div className={styles["landing-actions"]}>
-          <Link href="/studio" className="primary-button">
-            Enter Workspace
-          </Link>
+          <PrimaryLink href="/studio">Enter Workspace</PrimaryLink>
 
           <blockquote className={victorMono.className}>
             When in doubt, black it out.
