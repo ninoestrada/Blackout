@@ -3,6 +3,12 @@
  * Lets users load new text, clear their edits, save poems, and export them as PNGs.
  */
 
+"use client";
+
+import { motion } from "motion/react";
+
+import { buttonAnimation } from "@/lib/animations";
+
 import styles from "../page.module.css";
 
 type StudioActionsProps = {
@@ -21,7 +27,7 @@ type StudioActionsProps = {
 /**
  * Displays the Studio's main action buttons.
  *
- * @returns The Studio actions JSX.
+ * @returns The Studio actions.
  */
 export default function StudioActions({
   poemId,
@@ -36,42 +42,46 @@ export default function StudioActions({
   return (
     <div className={styles.studioActions}>
       {!poemId && (
-        <button
+        <motion.button
           type="button"
           className={styles.secondaryButton}
           onClick={onFreshFragment}
           disabled={isSaving}
+          {...buttonAnimation(isSaving)}
         >
           Fresh Fragment
-        </button>
+        </motion.button>
       )}
 
-      <button
+      <motion.button
         type="button"
         className={styles.secondaryButton}
         onClick={onCleanSlate}
         disabled={isSaving}
+        {...buttonAnimation(isSaving)}
       >
         Clean Slate
-      </button>
+      </motion.button>
 
-      <button
+      <motion.button
         type="button"
         className={styles.primaryButton}
         onClick={onSave}
         disabled={isSaving}
+        {...buttonAnimation(isSaving)}
       >
         {isSaving ? "Saving..." : savedPoemId ? "Save Changes" : "Save"}
-      </button>
+      </motion.button>
 
-      <button
+      <motion.button
         type="button"
         className={styles.secondaryButton}
         onClick={onExport}
         disabled={isExporting}
+        {...buttonAnimation(isExporting)}
       >
         {isExporting ? "Exporting..." : "Export PNG"}
-      </button>
+      </motion.button>
     </div>
   );
 }

@@ -1,10 +1,13 @@
-"use client";
-
 /**
  * Blackout's authentication button.
  * Handles Google sign-in and sign-out.
  */
 
+"use client";
+
+import { motion } from "motion/react";
+
+import { buttonAnimation } from "@/lib/animations";
 import { supabase } from "@/lib/supabase";
 
 type AuthButtonProps = {
@@ -14,7 +17,7 @@ type AuthButtonProps = {
 /**
  * Renders a sign-in or sign-out button based on the user's authentication state.
  *
- * @returns The authentication button JSX.
+ * @returns The authentication button.
  */
 export default function AuthButton({ isSignedIn }: AuthButtonProps) {
   /**
@@ -52,12 +55,22 @@ export default function AuthButton({ isSignedIn }: AuthButtonProps) {
   }
 
   return isSignedIn ? (
-    <button type="button" className="primary-button" onClick={handleSignOut}>
+    <motion.button
+      type="button"
+      className="primary-button"
+      onClick={handleSignOut}
+      {...buttonAnimation()}
+    >
       Sign out
-    </button>
+    </motion.button>
   ) : (
-    <button type="button" className="primary-button" onClick={handleSignIn}>
+    <motion.button
+      type="button"
+      className="primary-button"
+      onClick={handleSignIn}
+      {...buttonAnimation()}
+    >
       Sign in
-    </button>
+    </motion.button>
   );
 }

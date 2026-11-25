@@ -5,6 +5,7 @@
 
 "use client";
 
+import { motion, useIsPresent } from "motion/react";
 import {
   useEffect,
   useId,
@@ -12,6 +13,8 @@ import {
   type ReactNode,
   type RefObject,
 } from "react";
+
+import { buttonAnimation } from "@/lib/animations";
 
 import styles from "../page.module.css";
 
@@ -42,7 +45,7 @@ type ConfirmationModalProps = {
 
 /**
  * Displays a confirmation modal with options to confirm or cancel an action.
- * Allows users to navigate the modal with their keyboard and keeps the focus inside it until it closes.
+ * Supports keyboard navigation and keeps focus inside the modal until it closes.
  *
  * @returns The confirmation modal.
  */
@@ -61,12 +64,15 @@ export default function ConfirmationModal({
 }: ConfirmationModalProps) {
   const titleId = useId();
   const descriptionId = useId();
+  const isPresent = useIsPresent();
 
   const dialogRef = useRef<HTMLDivElement>(null);
   const cancelButtonRef = useRef<HTMLButtonElement>(null);
   const onCancelRef = useRef(onCancel);
   const latestInitialFocusRef = useRef(initialFocusRef);
   const isProcessingRef = useRef(isProcessing);
+
+  const isConfirmDisabled = confirmDisabled || isProcessing;
 
   // Keep the values used by the keyboard handler up to date.
   useEffect(() => {
@@ -76,6 +82,10 @@ export default function ConfirmationModal({
   }, [onCancel, initialFocusRef, isProcessing]);
 
   useEffect(() => {
+    if (!isPresent) {
+      return;
+    }
+
     const previouslyFocusedElement = document.activeElement;
 
     // Focus Cancel by default to prevent accidental confirmation.
@@ -155,11 +165,19 @@ export default function ConfirmationModal({
         previouslyFocusedElement.focus();
       }
     };
-  }, []);
+  }, [isPresent]);
 
   return (
-    <div className={styles.modalOverlay}>
-      <div
+    <motion.div
+      className={styles.modalOverlay}
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      transition={{ duration: 0.15 }}
+      inert={!isPresent}
+      style={{ pointerEvents: isPresent ? "auto" : "none" }}
+    >
+      <motion.div
         ref={dialogRef}
         className={styles.modal}
         role="dialog"
@@ -167,16 +185,23 @@ export default function ConfirmationModal({
         aria-labelledby={titleId}
         aria-describedby={descriptionId}
         tabIndex={-1}
+        initial={{ opacity: 0, scale: 0.97 }}
+        animate={{ opacity: 1, scale: 1 }}
+        exit={{ opacity: 0, scale: 0.97 }}
+        transition={{ duration: 0.2 }}
       >
-        <button
+        <motion.button
           type="button"
           className={styles.closeButton}
           onClick={onCancel}
           disabled={isProcessing}
           aria-label="Close"
+          whileHover={!isProcessing ? { scale: 1.1 } : undefined}
+          whileTap={!isProcessing ? { scale: 0.95 } : undefined}
+          transition={{ duration: 0.15 }}
         >
           ×
-        </button>
+        </motion.button>
 
         <h2 id={titleId}>{title}</h2>
 
@@ -196,26 +221,28 @@ export default function ConfirmationModal({
         )}
 
         <div className={styles.modalActions}>
-          <button
+          <motion.button
             ref={cancelButtonRef}
             type="button"
             className={styles.modalButton}
             onClick={onCancel}
             disabled={isProcessing}
+            {...buttonAnimation(isProcessing)}
           >
             Cancel
-          </button>
+          </motion.button>
 
-          <button
+          <motion.button
             type="button"
             className={styles.modalButton}
             onClick={onConfirm}
-            disabled={confirmDisabled || isProcessing}
+            disabled={isConfirmDisabled}
+            {...buttonAnimation(isConfirmDisabled)}
           >
             {isProcessing ? "Saving..." : confirmLabel}
-          </button>
+          </motion.button>
         </div>
-      </div>
-    </div>
+      </motion.div>
+    </motion.div>
   );
 }

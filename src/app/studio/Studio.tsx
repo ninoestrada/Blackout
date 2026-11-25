@@ -6,6 +6,7 @@
 "use client";
 
 // React
+import { AnimatePresence } from "motion/react";
 import { useEffect, useRef, useState } from "react";
 
 // Components
@@ -346,27 +347,31 @@ export default function Studio({
           </div>
         )}
 
-        {showFreshFragmentConfirmation && (
-          <ConfirmationModal
-            title="Start a fresh fragment?"
-            message="Your current blackout poem will be cleared."
-            dontShowAgain={dontShowAgain}
-            onDontShowAgainChange={setDontShowAgain}
-            onCancel={closeFreshFragmentConfirmation}
-            onConfirm={confirmFreshFragment}
-          />
-        )}
+        <AnimatePresence>
+          {showFreshFragmentConfirmation && (
+            <ConfirmationModal
+              key="fresh-fragment"
+              title="Start a fresh fragment?"
+              message="Your current blackout poem will be cleared."
+              dontShowAgain={dontShowAgain}
+              onDontShowAgainChange={setDontShowAgain}
+              onCancel={closeFreshFragmentConfirmation}
+              onConfirm={confirmFreshFragment}
+            />
+          )}
 
-        {showCleanSlateConfirmation && (
-          <ConfirmationModal
-            title="Clear your blackout?"
-            message="Your current blackout marks will be cleared."
-            dontShowAgain={dontShowCleanSlateAgain}
-            onDontShowAgainChange={setDontShowCleanSlateAgain}
-            onCancel={closeCleanSlateConfirmation}
-            onConfirm={confirmCleanSlate}
-          />
-        )}
+          {showCleanSlateConfirmation && (
+            <ConfirmationModal
+              key="clean-slate"
+              title="Clear your blackout?"
+              message="Your current blackout marks will be cleared."
+              dontShowAgain={dontShowCleanSlateAgain}
+              onDontShowAgainChange={setDontShowCleanSlateAgain}
+              onCancel={closeCleanSlateConfirmation}
+              onConfirm={confirmCleanSlate}
+            />
+          )}
+        </AnimatePresence>
       </section>
     </main>
   );

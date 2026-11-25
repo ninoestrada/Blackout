@@ -65,6 +65,9 @@
   font: inherit;
   font-size: 12px;
   cursor: pointer;
+  transition:
+    background-color 0.15s ease,
+    color 0.15s ease;
 }
 
 .toolButton:hover:not(:disabled) {
@@ -122,10 +125,6 @@
   border: 1px solid var(--color-border);
   border-radius: 50%;
   cursor: pointer;
-}
-
-.colorSwatch:hover {
-  transform: scale(1.1);
 }
 
 .colorSwatch:focus-visible,
@@ -208,6 +207,9 @@
 
 .passage span {
   cursor: pointer;
+  transition:
+    background-color 0.15s ease,
+    color 0.15s ease;
 }
 
 .blackedOut {
@@ -256,6 +258,9 @@
   font: inherit;
   font-size: 13px;
   cursor: pointer;
+  transition:
+    background-color 0.15s ease,
+    opacity 0.15s ease;
 }
 
 .primaryButton,
@@ -535,5 +540,17 @@
   .closeButton {
     top: 12px;
     right: 12px;
+  }
+}
+
+/* --------------- Reduced motion --------------- */
+
+@media (prefers-reduced-motion: reduce) {
+  .toolButton,
+  .primaryButton,
+  .secondaryButton,
+  .fragmentButton,
+  .passage span {
+    transition: none;
   }
 }

@@ -43,6 +43,13 @@ export default async function exportPoem({
           "style",
           `box-sizing: content-box; width: ${poemRect.width}px; padding: 64px 64px 80px;`,
         );
+
+        // Prevent word animations from affecting the exported image.
+        clonedPoem
+          .querySelectorAll<HTMLElement>(`.${styles.passage} span`)
+          .forEach((word) => {
+            word.style.transition = "none";
+          });
       }
 
       if (clonedPoem && titleInput) {

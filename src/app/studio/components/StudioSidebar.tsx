@@ -5,8 +5,14 @@
 
 "use client";
 
+import { useRef } from "react";
 import type { RefObject } from "react";
 
+import { AnimatePresence, motion } from "motion/react";
+
+import { buttonAnimation } from "@/lib/animations";
+
+import DrawingControls from "./DrawingControls";
 import styles from "../page.module.css";
 
 import type { StudioTool } from "../types";
@@ -32,7 +38,7 @@ type StudioSidebarProps = {
 /**
  * Displays the Studio's editing tools and history controls.
  *
- * @returns The Studio sidebar JSX.
+ * @returns The Studio sidebar.
  */
 export default function StudioSidebar({
   tool,
@@ -48,119 +54,85 @@ export default function StudioSidebar({
   canUndo,
   canRedo,
 }: StudioSidebarProps) {
+  const selectButtonRef = useRef<HTMLButtonElement>(null);
+
   return (
     <aside className={styles.toolPanel}>
       <div className={styles.toolSection}>
         <span className={styles.toolLabel}>Tools</span>
 
         <div className={styles.toolButtons}>
-          <button
+          <motion.button
+            ref={selectButtonRef}
             type="button"
             aria-pressed={tool === "select"}
             className={`${styles.toolButton} ${
               tool === "select" ? styles.activeTool : ""
             }`}
             onClick={() => setTool("select")}
+            {...buttonAnimation()}
           >
             Select
-          </button>
+          </motion.button>
 
-          <button
+          <motion.button
             type="button"
             aria-pressed={tool === "draw"}
             className={`${styles.toolButton} ${
               tool === "draw" ? styles.activeTool : ""
             }`}
             onClick={() => setTool("draw")}
+            {...buttonAnimation()}
           >
             Draw
-          </button>
+          </motion.button>
         </div>
       </div>
 
-      {tool === "draw" && (
-        <>
-          <div className={styles.toolSection}>
-            <span className={styles.toolLabel}>Color</span>
+      <AnimatePresence initial={false}>
+        {tool === "draw" && (
+          <DrawingControls
+            key="drawing-controls"
+            drawingColor={drawingColor}
+            setDrawingColor={setDrawingColor}
+            recentColors={recentColors}
+            colorInputRef={colorInputRef}
+            markerSize={markerSize}
+            setMarkerSize={setMarkerSize}
+            selectButtonRef={selectButtonRef}
+          />
+        )}
+      </AnimatePresence>
 
-            <div className={styles.colorControl}>
-              <input
-                ref={colorInputRef}
-                className={styles.colorInput}
-                type="color"
-                value={drawingColor}
-                onChange={(event) => setDrawingColor(event.target.value)}
-                aria-label="Drawing color"
-              />
-
-              <div className={styles.recentColors}>
-                {recentColors.map((color) => (
-                  <button
-                    key={color}
-                    type="button"
-                    className={styles.colorSwatch}
-                    style={{ backgroundColor: color }}
-                    onClick={() => setDrawingColor(color)}
-                    aria-label={`Use color ${color}`}
-                    aria-pressed={drawingColor === color}
-                  />
-                ))}
-              </div>
-            </div>
-          </div>
-
-          <div className={styles.toolSection}>
-            <label className={styles.toolLabel} htmlFor="marker-size">
-              Marker Size
-            </label>
-
-            <div className={styles.markerSizeControl}>
-              <input
-                id="marker-size"
-                className={styles.markerSizeInput}
-                type="number"
-                min="1"
-                max="100"
-                value={markerSize}
-                onChange={(event) => {
-                  const size = Number(event.target.value);
-
-                  if (size >= 1 && size <= 100) {
-                    setMarkerSize(size);
-                  }
-                }}
-                aria-label="Marker size"
-              />
-
-              <span>px</span>
-            </div>
-          </div>
-        </>
-      )}
-
-      <div className={styles.toolSection}>
+      <motion.div
+        layout="position"
+        className={styles.toolSection}
+        transition={{ layout: { duration: 0.2, ease: "easeInOut" } }}
+      >
         <span className={styles.toolLabel}>History</span>
 
         <div className={styles.historyButtons}>
-          <button
+          <motion.button
             type="button"
             className={styles.toolButton}
             onClick={undo}
             disabled={!canUndo}
+            {...buttonAnimation(!canUndo)}
           >
             Undo
-          </button>
+          </motion.button>
 
-          <button
+          <motion.button
             type="button"
             className={styles.toolButton}
             onClick={redo}
             disabled={!canRedo}
+            {...buttonAnimation(!canRedo)}
           >
             Redo
-          </button>
+          </motion.button>
         </div>
-      </div>
+      </motion.div>
     </aside>
   );
 }

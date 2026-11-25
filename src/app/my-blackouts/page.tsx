@@ -5,6 +5,7 @@
 
 "use client";
 
+import { AnimatePresence } from "motion/react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
@@ -125,26 +126,30 @@ export default function MyBlackouts() {
         </div>
       )}
 
-      {poemToRename && (
-        <RenamePoemModal
-          newTitle={newTitle}
-          isRenaming={isRenaming}
-          renameError={renameError}
-          onTitleChange={handleTitleChange}
-          onCancel={closeRenameModal}
-          onConfirm={() => void handleRename()}
-        />
-      )}
+      <AnimatePresence>
+        {poemToRename && (
+          <RenamePoemModal
+            key="rename-poem"
+            newTitle={newTitle}
+            isRenaming={isRenaming}
+            renameError={renameError}
+            onTitleChange={handleTitleChange}
+            onCancel={closeRenameModal}
+            onConfirm={() => void handleRename()}
+          />
+        )}
 
-      {poemToDelete && (
-        <ConfirmationModal
-          title="Delete blackout?"
-          message="This blackout will be permanently deleted."
-          confirmLabel="Delete"
-          onCancel={closeDeleteModal}
-          onConfirm={handleDelete}
-        />
-      )}
+        {poemToDelete && (
+          <ConfirmationModal
+            key="delete-poem"
+            title="Delete blackout?"
+            message="This blackout will be permanently deleted."
+            confirmLabel="Delete"
+            onCancel={closeDeleteModal}
+            onConfirm={handleDelete}
+          />
+        )}
+      </AnimatePresence>
     </main>
   );
 }
